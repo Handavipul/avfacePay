@@ -1,0 +1,413 @@
+<!-- Updated home.component.html - Hide camera when fallback is active -->
+<div class="login">
+  <div class="container">
+    <!-- Left Section -->
+    <div class="left-section">
+      <div class="left-content">
+        <div class="welcome-text">Welcome to</div>
+        <div class="brand-name">AV Pay</div>
+        <div class="tagline">Hassle free payment solution</div>
+      </div>
+    </div>
+
+    <!-- Right Section -->
+    <div class="right-section">
+      
+      <!-- Show Account Management Component -->
+      <div *ngIf="isAuthenticated && showAccountManagement" class="account-management-container">
+        <app-account-management></app-account-management>
+      </div>
+
+       <div *ngIf="isAuthenticated && showPaymentManagement" class="account-management-container">
+        <app-pay-now 
+          (onGoBack)="handleGoBack()" 
+          (onPaymentComplete)="handlePaymentComplete($event)">
+        </app-pay-now>
+       </div>
+       
+
+      <div *ngIf="isAuthenticated && showDashboard" class="dashboard-container">
+        <app-dashboard></app-dashboard>
+      </div>
+
+      <!-- Updated OTP Section with Email/Phone Input Step -->
+    <div *ngIf="showOTPInput" class="otp-fallback-container">
+      <!-- Success/Error Messages for OTP -->
+      <div *ngIf="successMessage" class="alert alert-success">
+        {{ successMessage }}
+      </div>
+      <div *ngIf="errorMessage" class="alert alert-error">
+        {{ errorMessage }}
+      </div>
+
+      <!-- Step 1: Email/Phone Input (when OTP code hasn't been sent yet) -->
+      <div *ngIf="!otpCodeSent" class="contact-input-container">
+        <div class="otp-header">
+          <div class="fallback-icon">🔐</div>
+          <div class="fallback-title">Backup Verification</div>
+          <div class="fallback-subtitle">
+            Face authentication failed. Please enter your email or phone number to receive a verification code.
+          </div>
+        </div>
+        
+        <div class="contact-input-section">
+          <div class="input-method-tabs">
+            <button 
+              class="tab-btn" 
+              [class.active]="selectedContactMethod === 'email'"
+              (click)="selectContactMethod('email')">
+              📧 Email
+            </button>
+            <button 
+              class="tab-btn" 
+              [class.active]="selectedContactMethod === 'sms'"
+              (click)="selectContactMethod('sms')">
+              📱 Phone
+            </button>
+          </div>
+
+          <div class="contact-input-wrapper">
+            <input 
+              *ngIf="selectedContactMethod === 'email'"
+              type="email" 
+              [(ngModel)]="contactEmail"
+              placeholder="Enter your email address"
+              class="contact-input"
+              [disabled]="isLoadingOTP"
+              (keyup.enter)="sendOTPCode()">
+            
+            <input 
+              *ngIf="selectedContactMethod === 'sms'"
+              type="tel" 
+              [(ngModel)]="contactPhone"
+              placeholder="Enter your phone number"
+              class="contact-input"
+              [disabled]="isLoadingOTP"
+              (keyup.enter)="sendOTPCode()">
+            
+            <div class="contact-actions">
+              <button 
+                class="btn primary" 
+                (click)="sendOTPCode()"
+                [disabled]="!isContactInfoValid() || isLoadingOTP">
+                <span *ngIf="isLoadingOTP">Sending Code...</span>
+                <span *ngIf="!isLoadingOTP">Send Verification Code</span>
+              </button>
+            </div>
+          </div>
+
+          <!-- Back to camera option -->
+          <div class="fallback-actions">
+            <button 
+              class="btn secondary" 
+              (click)="cancelOTPFlow()"
+              [disabled]="isLoadingOTP">
+              <div class="btn-text">← Try Face Authentication Again</div>
+            </button>
+            
+            <button 
+              class="btn tertiary" 
+              (click)="handleAuthCancel()"
+              [disabled]="isLoadingOTP">
+              <div class="btn-text">Cancel & Go Back</div>
+            </button>
+          </div>
+        </div>
+      </div>
+
+      <!-- Step 2: OTP Code Input (when code has been sent) -->
+      <div *ngIf="otpCodeSent" class="otp-form-container">
+        <div class="otp-header">
+          <div class="fallback-icon">🔐</div>
+          <div class="fallback-title">Backup Verification</div>
+          <div class="fallback-subtitle">
+            Verification code sent to your {{ selectedContactMethod }}: 
+            <strong>{{ getDisplayContact() }}</strong>
+          </div>
+        </div>
+        
+        <div class="otp-input-section">
+          <div class="otp-label">Enter 6-digit verification code</div>
+          <input 
+            type="text" 
+            [(ngModel)]="otpCode"
+            placeholder="000000"
+            class="otp-input"
+            maxlength="6"
+            (keyup.enter)="validateOTP()"
+            (input)="onOTPInput($event)"
+            [disabled]="isLoadingOTP">
+        
+          <div class="otp-actions">
+            <button 
+              class="btn primary" 
+              (click)="validateOTP()"
+              [disabled]="!otpCode || otpCode.length !== 6 || isLoadingOTP">
+              <span *ngIf="isLoadingOTP">Verifying...</span>
+              <span *ngIf="!isLoadingOTP">Verify Code</span>
+            </button>
+          </div>
+        </div>
+
+        <!-- Resend and Method Options -->
+        <div class="otp-options">
+          <button 
+            class="btn-link" 
+            (click)="resendOTP()"
+            [disabled]="!canResendOTP || isLoadingOTP">
+            <span *ngIf="canResendOTP">Resend Code</span>
+            <span *ngIf="!canResendOTP">Resend in {{ otpCountdown }}s</span>
+          </button>
+
+          <!-- Change contact info option -->
+          <button 
+            class="btn-link change-contact-btn" 
+            (click)="changeContactInfo()"
+            [disabled]="isLoadingOTP">
+            Change {{ selectedContactMethod === 'email' ? 'Email' : 'Phone' }}
+          </button>
+        </div>
+
+        <!-- Attempt counter -->
+        <div class="attempt-info" *ngIf="otpAttempts > 0">
+          <div class="attempt-warning">
+            ⚠️ {{ maxOTPAttempts - otpAttempts }} attempts remaining
+          </div>
+        </div>
+
+        <!-- Back to camera option -->
+        <div class="fallback-actions">
+          <button 
+            class="btn secondary" 
+            (click)="cancelOTPFlow()"
+            [disabled]="isLoadingOTP">
+            <div class="btn-text">← Try Face Authentication Again</div>
+          </button>
+          
+          <button 
+            class="btn tertiary" 
+            (click)="handleAuthCancel()"
+            [disabled]="isLoadingOTP">
+            <div class="btn-text">Cancel & Go Back</div>
+          </button>
+        </div>
+      </div>
+    </div>
+
+      <!-- Show Face Capture Component (Only when OTP is NOT active) -->
+      <div *ngIf="showFaceCapture && !showOTPInput" class="face-auth-container">
+        <!-- Success/Error Messages at top of camera interface -->
+        <div *ngIf="successMessage" class="alert alert-success camera-alert">
+          {{ successMessage }}
+        </div>
+        <div *ngIf="errorMessage" class="alert alert-error camera-alert">
+          {{ errorMessage }}
+        </div>
+
+        <app-auth 
+          [mode]="currentMode"
+          [email]="userEmail"
+          (onSuccess)="handleAuthSuccess($event)"
+          (onError)="handleAuthError($event)"
+          (onCancel)="handleAuthCancel()">
+        </app-auth>
+
+        <div class="camera-help-section">
+          <div class="help-text">
+            Having trouble? Ensure good lighting and position your face clearly in the camera.
+          </div>
+          
+          <!-- Action buttons for camera interface -->
+          <div class="camera-actions">
+            <button class="btn secondary" (click)="handleAuthCancel()">
+              <div class="btn-text">← Back to Main</div>
+            </button>
+            
+            <!-- Show fallback trigger button -->
+            <button 
+              class="btn primary" 
+              (click)="triggerBackupVerification()" *ngIf="showBackupOption">
+              <div class="btn-text">📧 Use Backup Verification</div>
+            </button>
+          </div>
+        </div>
+      </div>
+
+      <!-- Show Email Input (for register/login modes) -->
+      <div *ngIf="showEmailInput" class="email-input-container">
+        <div class="form-container">
+          <div class="form-title">
+            {{ currentMode === 'register' ? 'Enter Email for Registration' : 'Enter Email for Login' }}
+          </div>
+          
+          <div class="email-form">
+            <input 
+              type="email" 
+              [(ngModel)]="userEmail"
+              placeholder="Enter your email address"
+              class="email-input"
+              (keyup.enter)="proceedWithEmail()">
+              
+            
+            <div class="btn-wrapper">
+              <button class="btn" (click)="proceedWithEmail()">
+                <div class="btn-text">Continue</div>
+              </button>
+              <button class="btn secondary" (click)="cancelEmailInput()">
+                <div class="btn-text">Cancel</div>
+              </button>
+            </div>
+          </div>
+        </div>
+      </div>
+
+      <!-- Show Main Login Form (when NOT authenticated) -->
+      <div *ngIf="!showFaceCapture && !showEmailInput && !isAuthenticated && !showOTPInput" class="form-container">
+        <!-- Success/Error Messages -->
+        <div *ngIf="successMessage" class="alert alert-success">
+          {{ successMessage }}
+        </div>
+        <div *ngIf="errorMessage" class="alert alert-error">
+          {{ errorMessage }}
+        </div>
+
+        <!-- Login Form (when not showing register) -->
+        <div *ngIf="!showRegister">
+          <div class="form-title">Login or Register</div>
+          
+          <!-- Face Auth Buttons -->
+          <div class="btn-wrapper">
+            <button class="btn primary" (click)="startQuickLogin()">
+              <div class="btn-text">🎭 Quick Face Login</div>
+            </button>
+          </div>
+
+          <div class="auth-options">
+            <button class="auth-option-btn" (click)="startFaceRegistration()">
+              <div class="auth-option-text">👤 Register with Face</div>
+            </button>
+          </div>
+
+          <div class="register-section">
+            <div class="register-prompt">Don't have an account?</div>
+            <button class="register-btn" (click)="showRegisterForm()">
+              <div class="register-text">Register</div>
+            </button>
+          </div>
+
+          <div class="terms-conditions">
+            <a href="#">Terms & Conditions</a> | <a href="#">Privacy Policy</a>
+          </div>
+        </div>
+
+        <!-- Register Form -->
+        <div *ngIf="showRegister">
+          <div class="form-title">Create Account</div>
+          
+          <div class="register-form">
+            <input 
+              type="text" 
+              [(ngModel)]="registerName"
+              placeholder="Full Name"
+              class="form-input">
+            
+            <input 
+              type="email" 
+              [(ngModel)]="registerEmail"
+              placeholder="Email address"
+              class="form-input">
+            
+            <input 
+              type="password" 
+              [(ngModel)]="registerPassword"
+              placeholder="Password"
+              class="form-input">
+            
+            <input 
+              type="password" 
+              [(ngModel)]="registerConfirm"
+              placeholder="Confirm Password"
+              class="form-input">
+          </div>
+          
+          <div class="btn-wrapper">
+            <button class="btn primary" (click)="registerWithForm()">
+              <div class="btn-text">Register</div>
+            </button>
+            <button class="btn secondary" (click)="hideRegisterForm()">
+              <div class="btn-text">Back to Login</div>
+            </button>
+          </div>
+        </div>
+      </div>
+
+      <!-- Show Authenticated User Dashboard (when logged in and not in other modes) -->
+      <div *ngIf="isAuthenticated && !showFaceCapture && !showEmailInput && !showAccountManagement && !showPaymentManagement&& !showOTPInput && !showDashboard" class="authenticated-container">
+        <!-- Success/Error Messages for authenticated users -->
+        <div *ngIf="successMessage" class="alert alert-success">
+          {{ successMessage }}
+        </div>
+        <div *ngIf="errorMessage" class="alert alert-error">
+          {{ errorMessage }}
+        </div>
+
+        <div class="top-left-actions">
+          <div class="user-profile-container">
+            <div class="user-avatar-circle">
+              <span class="user-initials">{{ getUserInitials() }}</span>
+            </div>
+            <div class="user-fullname-tooltip">
+              {{ currentUser?.name || currentUser?.email }}
+            </div>
+          </div>
+        </div>
+
+        <div class="top-right-actions">
+          <!-- Logout Icon -->
+          <button class="logout-icon-btn" (click)="logout()" title="Logout">
+            <div class="shutdown-icon">⏻</div>
+          </button>
+        </div>
+
+        <div class="welcome-back-card">
+          <div class="quick-actions">
+            <button class="btn primary large" (click)="showPaymentManagementView()">
+              <div class="btn-text">💳 Pay Now</div>
+            </button>
+
+            <button class="btn secondary large" (click)="showAccountManagementView()">
+              <div class="btn-text">💳 Manage Accounts</div>
+            </button>
+            
+            <button class="btn secondary large" (click)="navigateToDashboard()">
+              <div class="btn-text">📊 Dashboard</div>
+            </button>
+          </div>
+          
+          <!-- Quick Stats -->
+          <div class="quick-stats">
+            <div class="stat-item">
+              <div class="stat-icon">💳</div>
+              <div class="stat-text">
+                <div class="stat-number">{{ cardCount }}</div>
+                <div class="stat-label">Cards</div>
+              </div>
+            </div>
+            <div class="stat-item">
+              <div class="stat-icon">🏦</div>
+              <div class="stat-text">
+                <div class="stat-number">{{ bankAccountCount }}</div>
+                <div class="stat-label">Accounts</div>
+              </div>
+            </div>
+            <!-- <div class="stat-item">
+              <div class="stat-icon">💰</div>
+              <div class="stat-text">
+                <div class="stat-number">$0.00</div>
+                <div class="stat-label">Balance</div>
+              </div>
+            </div> -->
+
+    </div>
+  </div>
+</div>

@@ -1,0 +1,181 @@
+<!-- dashboard.component.html - Modern Interactive Cards UI -->
+<div class="authenticated-container">
+  <!-- Success/Error Messages -->
+  <div *ngIf="successMessage" class="alert alert-success">
+    {{ successMessage }}
+  </div>
+  <div *ngIf="errorMessage" class="alert alert-error">
+    {{ errorMessage }}
+  </div>
+
+  <!-- Loading Indicator -->
+  <div *ngIf="isLoading" class="loading-container">
+    <div class="loading-spinner"></div>
+    <div class="loading-text">Loading your dashboard...</div>
+  </div>
+
+  <!-- Main Dashboard Card -->
+  <div class="welcome-back-card dashboard-card">
+    <div class="content-section scrollable-content" *ngIf="!isLoading">
+    <!-- Header -->
+    <!-- <div class="welcome-header dashboard-header">
+      <div class="header-left">
+        <button class="btn btn-secondary btn-sm back-button" (click)="goBack()">
+          <div class="btn-text">← Back</div>
+        </button>
+        <div class="header-content">
+          <h2 class="welcome-title">Dashboard</h2>
+          <p class="welcome-subtitle">
+            Welcome back, {{ currentUser?.name || 'User' }}!
+          </p>
+        </div>
+      </div>
+      
+      <div class="header-right">
+        <button class="btn btn-secondary btn-sm" (click)="refreshDashboard()" [disabled]="isLoading">
+          <div class="btn-text">↻ Refresh</div>
+        </button>
+        
+        <div class="user-profile">
+          <div class="user-avatar">
+            <span class="user-initials">{{ getUserInitials() }}</span>
+          </div>
+        </div>
+      </div>
+    </div> -->
+
+    <!-- Dashboard Content -->
+    <div *ngIf="!isLoading" class="content-section">
+      
+      <!-- Summary Stats Row -->
+      <!-- Quick Actions Section -->
+      <div class="overview-grid">
+
+        <!-- Spending Chart Card -->
+        <div class="summary-card spending-chart-card">
+          <div class="summary-header" >
+            <h3 class="summary-title">📈 Spending Trends</h3>
+            <!-- <span class="toggle-icon">
+                 {{ isSpendingExpanded ? '▲' : '▼' }}
+            </span> -->
+            <div class="chart-controls">
+              <select 
+                [(ngModel)]="selectedPeriod" 
+               
+                class="period-selector">
+                <option value="week">Weekly</option>
+                <option value="month">Monthly</option>
+                <option value="quarter">Quarterly</option>
+                <option value="year">Yearly</option>
+              </select>
+            </div>
+          </div>
+          
+          <div class="summary-content" *ngIf="isSpendingExpanded">
+            <div class="chart-container">
+              <div class="spending-chart">
+                <div 
+                  *ngFor="let data of spendingData; let i = index" 
+                  class="chart-bar"
+                  [style.height.%]="(data.amount / getMaxSpending()) * 100">
+                  <div class="bar-fill" [style.height.%]="(data.amount / getMaxSpending()) * 100"></div>
+                  <div class="bar-value">{{ formatCurrency(data.amount) }}</div>
+                  <div class="bar-label">{{ data.month }}</div>
+                </div>
+              </div>
+            </div>
+            
+            <!-- Category Breakdown -->
+            <div class="category-breakdown">
+              <div class="category-header">Top Categories This Month</div>
+              <div class="category-list">
+                <div 
+                  *ngFor="let category of categorySpending.slice(0, 4)" 
+                  class="category-item">
+                  <div class="category-color" [style.background-color]="category.color"></div>
+                  <div class="category-name">{{ category.name }}</div>
+                  <div class="category-amount">{{ formatCurrency(category.value) }}</div>
+                </div>
+              </div>
+            </div>
+          </div>
+        </div>
+      </div>
+
+      <!-- Favorites and Transactions Row -->
+      <div class="overview-grid">
+        <!-- Favorite Payees Card -->
+        <div class="summary-card favorites-card">
+          <div class="summary-header" >
+            <h3 class="summary-title">⭐ Favorite Payees</h3>
+             <!-- <span class="toggle-icon">
+            {{ isFavoritesExpanded ? '▲' : '▼' }}
+            </span> -->
+            <button class="add-btn" (click)="navigateToAccounts()">View All</button>
+          </div>
+          
+          <div class="summary-content"  *ngIf="isFavoritesExpanded">
+            <div *ngIf="favoritePayees.length === 0" class="empty-state">
+              <p>No favorite payees yet</p>
+              <button class="btn primary small" >Add First Favorite</button>
+            </div>
+
+            <div *ngIf="favoritePayees.length > 0" class="favorites-list">
+              <div 
+                *ngFor="let payee of favoritePayees.slice(0, 4)" 
+                class="favorite-item"
+                (click)="onFavoritePayeeClick(payee)">
+                
+                <div class="favorite-avatar">
+                  <div class="avatar-circle" [ngClass]="{'business': payee.type === 'business'}">
+                    <span class="avatar-text">
+                      {{ payee.name.substring(0, 2).toUpperCase() }}
+                    </span>
+                  </div>
+                </div>
+                
+                <div class="favorite-info">
+                  <div class="favorite-name">{{ payee.name }}</div>
+                  <div class="favorite-details">
+                    <span class="last-amount" *ngIf="payee.lastAmount">
+                      Last: {{ formatCurrency(payee.lastAmount) }}
+                    </span>
+                    <span class="frequency">{{ payee.frequency }} payments</span>
+                  </div>
+                </div>
+                
+                <div class="favorite-action">
+                  <div class="action-arrow">→</div>
+                </div>
+              </div>
+            </div>
+
+            <button class="add-favorite-btn" >
+              <div class="add-icon">+</div>
+              <div class="add-text">Add Favorite</div>
+            </button>
+          </div>
+        </div>
+
+        <!-- Recent Transactions Card -->
+      
+      </div>
+
+      <!-- Main Action Buttons -->
+      <!-- <div class="quick-actions account-actions">
+        <button class="btn primary large" >
+          <div class="btn-text">💳 Make Payment</div>
+        </button>
+        <div class="quick-action-row">
+          <button class="btn secondary" (click)="navigateToTransactions()">
+            <div class="btn-text">📊 View Transactions</div>
+          </button>
+          <button class="btn secondary" (click)="navigateToAccounts()">
+            <div class="btn-text">⚙️ Manage Accounts</div>
+          </button>
+        </div>
+      </div> -->
+
+    </div>
+  </div>
+</div></div>

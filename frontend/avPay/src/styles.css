@@ -1,0 +1,333 @@
+@import url("https://cdnjs.cloudflare.com/ajax/libs/meyer-reset/2.0/reset.min.css");
+* {
+  -webkit-font-smoothing: antialiased;
+  box-sizing: border-box;
+}
+html,
+body {
+  margin: 0px;
+  height: 100%;
+}
+/* a blue color as a generic focus style */
+button:focus-visible {
+  outline: 2px solid #4a90e2 !important;
+  outline: -webkit-focus-ring-color auto 5px !important;
+}
+a {
+  text-decoration: none;
+}
+
+:root {
+  --primaryblue: rgba(0, 52, 102, 1);
+  --primaryblue-2: rgba(0, 77, 153, 1);
+  --primaryblue-lyt: rgba(204, 230, 255, 1);
+  --primaryblur-xlyt: rgba(230, 242, 255, 1);
+  --grey-20: rgba(51, 51, 51, 1);
+  --grey-54: rgba(138, 138, 138, 1);
+  --grey-90: rgba(230, 230, 230, 1);
+  --grey-98: rgba(250, 250, 250, 1);
+  --grey-0: rgba(255, 255, 255, 1);
+  --accentgreen: rgba(32, 191, 85, 1);
+  --accentgreen-lyt: rgba(218, 242, 226, 1);
+  --accentgreen-xlyt: rgba(237, 250, 242, 1);
+  --bglyt-blue: rgba(229, 229, 229, 1);
+  --bgwyt: rgba(255, 255, 255, 1);
+  --h2-light-font-family: "Plus Jakarta Sans", Helvetica;
+  --h2-light-font-weight: 300;
+  --h2-light-font-size: 28px;
+  --h2-light-letter-spacing: 0px;
+  --h2-light-line-height: 36px;
+  --h2-light-font-style: normal;
+  --copy-xbold-font-family: "Plus Jakarta Sans", Helvetica;
+  --copy-xbold-font-weight: 800;
+  --copy-xbold-font-size: 16px;
+  --copy-xbold-letter-spacing: 0.16px;
+  --copy-xbold-line-height: 24px;
+  --copy-xbold-font-style: normal;
+  --copy-mini-med-font-family: "Plus Jakarta Sans", Helvetica;
+  --copy-mini-med-font-weight: 500;
+  --copy-mini-med-font-size: 12px;
+  --copy-mini-med-letter-spacing: 0px;
+  --copy-mini-med-line-height: 16px;
+  --copy-mini-med-font-style: normal;
+  --copy-med-font-family: "Plus Jakarta Sans", Helvetica;
+  --copy-med-font-weight: 500;
+  --copy-med-font-size: 16px;
+  --copy-med-letter-spacing: 0px;
+  --copy-med-line-height: 24px;
+  --copy-med-font-style: normal;
+  --h2-med-font-family: "Plus Jakarta Sans", Helvetica;
+  --h2-med-font-weight: 500;
+  --h2-med-font-size: 28px;
+  --h2-med-letter-spacing: 0px;
+  --h2-med-line-height: 36px;
+  --h2-med-font-style: normal;
+  --h4-med-font-family: "Plus Jakarta Sans", Helvetica;
+  --h4-med-font-weight: 500;
+  --h4-med-font-size: 20px;
+  --h4-med-letter-spacing: 0px;
+  --h4-med-line-height: 28px;
+  --h4-med-font-style: normal;
+  --material-theme-schemes-primary: rgba(101, 85, 143, 1);
+  --material-theme-schemes-surface-tint: rgba(103, 80, 164, 1);
+  --material-theme-schemes-on-primary: rgba(255, 255, 255, 1);
+  --material-theme-schemes-primary-container: rgba(234, 221, 255, 1);
+  --material-theme-schemes-on-primary-container: rgba(33, 0, 93, 1);
+  --material-theme-schemes-secondary: rgba(98, 91, 113, 1);
+  --material-theme-schemes-on-secondary: rgba(255, 255, 255, 1);
+  --material-theme-schemes-secondary-container: rgba(232, 222, 248, 1);
+  --material-theme-schemes-on-secondary-container: rgba(29, 25, 43, 1);
+  --material-theme-schemes-tertiary: rgba(125, 82, 96, 1);
+  --material-theme-schemes-on-tertiary: rgba(255, 255, 255, 1);
+  --material-theme-schemes-tertiary-container: rgba(255, 216, 228, 1);
+  --material-theme-schemes-on-tertiary-container: rgba(49, 17, 29, 1);
+  --material-theme-schemes-error: rgba(179, 38, 30, 1);
+  --material-theme-schemes-on-error: rgba(255, 255, 255, 1);
+  --material-theme-schemes-error-container: rgba(249, 222, 220, 1);
+  --material-theme-schemes-on-error-container: rgba(65, 14, 11, 1);
+  --material-theme-schemes-background: rgba(254, 247, 255, 1);
+  --material-theme-schemes-on-background: rgba(29, 27, 32, 1);
+  --material-theme-schemes-surface: rgba(254, 247, 255, 1);
+  --material-theme-schemes-on-surface: rgba(29, 27, 32, 1);
+  --material-theme-schemes-surface-variant: rgba(231, 224, 236, 1);
+  --material-theme-schemes-on-surface-variant: rgba(73, 69, 79, 1);
+  --material-theme-schemes-outline: rgba(121, 116, 126, 1);
+  --material-theme-schemes-outline-variant: rgba(202, 196, 208, 1);
+  --material-theme-schemes-shadow: rgba(0, 0, 0, 1);
+  --material-theme-schemes-scrim: rgba(0, 0, 0, 1);
+  --material-theme-schemes-inverse-surface: rgba(50, 47, 53, 1);
+  --material-theme-schemes-inverse-on-surface: rgba(245, 239, 247, 1);
+  --material-theme-schemes-inverse-primary: rgba(208, 188, 255, 1);
+  --material-theme-schemes-primary-fixed: rgba(234, 221, 255, 1);
+  --material-theme-schemes-on-primary-fixed: rgba(33, 0, 93, 1);
+  --material-theme-schemes-primary-fixed-dim: rgba(208, 188, 255, 1);
+  --material-theme-schemes-on-primary-fixed-variant: rgba(79, 55, 139, 1);
+  --material-theme-schemes-secondary-fixed: rgba(232, 222, 248, 1);
+  --material-theme-schemes-on-secondary-fixed: rgba(29, 25, 43, 1);
+  --material-theme-schemes-secondary-fixed-dim: rgba(204, 194, 220, 1);
+  --material-theme-schemes-on-secondary-fixed-variant: rgba(74, 68, 88, 1);
+  --material-theme-schemes-tertiary-fixed: rgba(255, 216, 228, 1);
+  --material-theme-schemes-on-tertiary-fixed: rgba(49, 17, 29, 1);
+  --material-theme-schemes-tertiary-fixed-dim: rgba(239, 184, 200, 1);
+  --material-theme-schemes-on-tertiary-fixed-variant: rgba(99, 59, 72, 1);
+  --material-theme-schemes-surface-dim: rgba(222, 216, 225, 1);
+  --material-theme-schemes-surface-bright: rgba(254, 247, 255, 1);
+  --material-theme-schemes-surface-container-lowest: rgba(255, 255, 255, 1);
+  --material-theme-schemes-surface-container-low: rgba(247, 242, 250, 1);
+  --material-theme-schemes-surface-container: rgba(243, 237, 247, 1);
+  --material-theme-schemes-surface-container-high: rgba(236, 230, 240, 1);
+  --material-theme-schemes-surface-container-highest: rgba(230, 224, 233, 1);
+}
+
+/*
+
+To enable a theme in your HTML, simply add one of the following data attributes to an HTML element, like so:
+
+<body data-material-theme-mode="light">
+    <!-- the rest of your content -->
+</body>
+
+You can apply the theme on any DOM node, not just the `body`
+
+*/
+
+[data-material-theme-mode="light"] {
+  --material-theme-schemes-primary: rgba(101, 85, 143, 1);
+  --material-theme-schemes-surface-tint: rgba(103, 80, 164, 1);
+  --material-theme-schemes-on-primary: rgba(255, 255, 255, 1);
+  --material-theme-schemes-primary-container: rgba(234, 221, 255, 1);
+  --material-theme-schemes-on-primary-container: rgba(33, 0, 93, 1);
+  --material-theme-schemes-secondary: rgba(98, 91, 113, 1);
+  --material-theme-schemes-on-secondary: rgba(255, 255, 255, 1);
+  --material-theme-schemes-secondary-container: rgba(232, 222, 248, 1);
+  --material-theme-schemes-on-secondary-container: rgba(29, 25, 43, 1);
+  --material-theme-schemes-tertiary: rgba(125, 82, 96, 1);
+  --material-theme-schemes-on-tertiary: rgba(255, 255, 255, 1);
+  --material-theme-schemes-tertiary-container: rgba(255, 216, 228, 1);
+  --material-theme-schemes-on-tertiary-container: rgba(49, 17, 29, 1);
+  --material-theme-schemes-error: rgba(179, 38, 30, 1);
+  --material-theme-schemes-on-error: rgba(255, 255, 255, 1);
+  --material-theme-schemes-error-container: rgba(249, 222, 220, 1);
+  --material-theme-schemes-on-error-container: rgba(65, 14, 11, 1);
+  --material-theme-schemes-background: rgba(254, 247, 255, 1);
+  --material-theme-schemes-on-background: rgba(29, 27, 32, 1);
+  --material-theme-schemes-surface: rgba(254, 247, 255, 1);
+  --material-theme-schemes-on-surface: rgba(29, 27, 32, 1);
+  --material-theme-schemes-surface-variant: rgba(231, 224, 236, 1);
+  --material-theme-schemes-on-surface-variant: rgba(73, 69, 79, 1);
+  --material-theme-schemes-outline: rgba(121, 116, 126, 1);
+  --material-theme-schemes-outline-variant: rgba(202, 196, 208, 1);
+  --material-theme-schemes-inverse-surface: rgba(50, 47, 53, 1);
+  --material-theme-schemes-inverse-on-surface: rgba(245, 239, 247, 1);
+  --material-theme-schemes-inverse-primary: rgba(208, 188, 255, 1);
+  --material-theme-schemes-primary-fixed: rgba(234, 221, 255, 1);
+  --material-theme-schemes-on-primary-fixed: rgba(33, 0, 93, 1);
+  --material-theme-schemes-primary-fixed-dim: rgba(208, 188, 255, 1);
+  --material-theme-schemes-on-primary-fixed-variant: rgba(79, 55, 139, 1);
+  --material-theme-schemes-secondary-fixed: rgba(232, 222, 248, 1);
+  --material-theme-schemes-on-secondary-fixed: rgba(29, 25, 43, 1);
+  --material-theme-schemes-secondary-fixed-dim: rgba(204, 194, 220, 1);
+  --material-theme-schemes-on-secondary-fixed-variant: rgba(74, 68, 88, 1);
+  --material-theme-schemes-tertiary-fixed: rgba(255, 216, 228, 1);
+  --material-theme-schemes-on-tertiary-fixed: rgba(49, 17, 29, 1);
+  --material-theme-schemes-tertiary-fixed-dim: rgba(239, 184, 200, 1);
+  --material-theme-schemes-on-tertiary-fixed-variant: rgba(99, 59, 72, 1);
+  --material-theme-schemes-surface-dim: rgba(222, 216, 225, 1);
+  --material-theme-schemes-surface-bright: rgba(254, 247, 255, 1);
+  --material-theme-schemes-surface-container-lowest: rgba(255, 255, 255, 1);
+  --material-theme-schemes-surface-container-low: rgba(247, 242, 250, 1);
+  --material-theme-schemes-surface-container: rgba(243, 237, 247, 1);
+  --material-theme-schemes-surface-container-high: rgba(236, 230, 240, 1);
+  --material-theme-schemes-surface-container-highest: rgba(230, 224, 233, 1);
+}
+
+[data-material-theme-mode="light-high-contrast"] {
+  --material-theme-schemes-primary: rgba(39, 23, 78, 1);
+  --material-theme-schemes-surface-tint: rgba(101, 85, 143, 1);
+  --material-theme-schemes-on-primary: rgba(255, 255, 255, 1);
+  --material-theme-schemes-primary-container: rgba(73, 57, 113, 1);
+  --material-theme-schemes-on-primary-container: rgba(255, 255, 255, 1);
+  --material-theme-schemes-secondary: rgba(39, 23, 78, 1);
+  --material-theme-schemes-on-secondary: rgba(255, 255, 255, 1);
+  --material-theme-schemes-secondary-container: rgba(73, 57, 113, 1);
+  --material-theme-schemes-on-secondary-container: rgba(255, 255, 255, 1);
+  --material-theme-schemes-tertiary: rgba(66, 14, 36, 1);
+  --material-theme-schemes-on-tertiary: rgba(255, 255, 255, 1);
+  --material-theme-schemes-tertiary-container: rgba(107, 47, 69, 1);
+  --material-theme-schemes-on-tertiary-container: rgba(255, 255, 255, 1);
+  --material-theme-schemes-error: rgba(68, 15, 14, 1);
+  --material-theme-schemes-on-error: rgba(255, 255, 255, 1);
+  --material-theme-schemes-error-container: rgba(110, 47, 44, 1);
+  --material-theme-schemes-on-error-container: rgba(255, 255, 255, 1);
+  --material-theme-schemes-background: rgba(253, 247, 255, 1);
+  --material-theme-schemes-on-background: rgba(29, 27, 32, 1);
+  --material-theme-schemes-surface: rgba(253, 247, 255, 1);
+  --material-theme-schemes-on-surface: rgba(0, 0, 0, 1);
+  --material-theme-schemes-surface-variant: rgba(230, 224, 236, 1);
+  --material-theme-schemes-on-surface-variant: rgba(37, 35, 43, 1);
+  --material-theme-schemes-outline: rgba(68, 65, 74, 1);
+  --material-theme-schemes-outline-variant: rgba(68, 65, 74, 1);
+  --material-theme-schemes-inverse-surface: rgba(50, 47, 53, 1);
+  --material-theme-schemes-inverse-on-surface: rgba(255, 255, 255, 1);
+  --material-theme-schemes-inverse-primary: rgba(241, 232, 255, 1);
+  --material-theme-schemes-primary-fixed: rgba(73, 57, 113, 1);
+  --material-theme-schemes-on-primary-fixed: rgba(255, 255, 255, 1);
+  --material-theme-schemes-primary-fixed-dim: rgba(50, 35, 89, 1);
+  --material-theme-schemes-on-primary-fixed-variant: rgba(255, 255, 255, 1);
+  --material-theme-schemes-secondary-fixed: rgba(73, 57, 113, 1);
+  --material-theme-schemes-on-secondary-fixed: rgba(255, 255, 255, 1);
+  --material-theme-schemes-secondary-fixed-dim: rgba(50, 35, 89, 1);
+  --material-theme-schemes-on-secondary-fixed-variant: rgba(255, 255, 255, 1);
+  --material-theme-schemes-tertiary-fixed: rgba(107, 47, 69, 1);
+  --material-theme-schemes-on-tertiary-fixed: rgba(255, 255, 255, 1);
+  --material-theme-schemes-tertiary-fixed-dim: rgba(80, 25, 47, 1);
+  --material-theme-schemes-on-tertiary-fixed-variant: rgba(255, 255, 255, 1);
+  --material-theme-schemes-surface-dim: rgba(222, 216, 224, 1);
+  --material-theme-schemes-surface-bright: rgba(253, 247, 255, 1);
+  --material-theme-schemes-surface-container-lowest: rgba(255, 255, 255, 1);
+  --material-theme-schemes-surface-container-low: rgba(247, 242, 250, 1);
+  --material-theme-schemes-surface-container: rgba(242, 236, 244, 1);
+  --material-theme-schemes-surface-container-high: rgba(236, 230, 238, 1);
+  --material-theme-schemes-surface-container-highest: rgba(230, 225, 233, 1);
+}
+
+[data-material-theme-mode="light-medium-contrast"] {
+  --material-theme-schemes-primary: rgba(73, 57, 113, 1);
+  --material-theme-schemes-surface-tint: rgba(101, 85, 143, 1);
+  --material-theme-schemes-on-primary: rgba(255, 255, 255, 1);
+  --material-theme-schemes-primary-container: rgba(123, 107, 167, 1);
+  --material-theme-schemes-on-primary-container: rgba(255, 255, 255, 1);
+  --material-theme-schemes-secondary: rgba(73, 57, 113, 1);
+  --material-theme-schemes-on-secondary: rgba(255, 255, 255, 1);
+  --material-theme-schemes-secondary-container: rgba(124, 107, 167, 1);
+  --material-theme-schemes-on-secondary-container: rgba(255, 255, 255, 1);
+  --material-theme-schemes-tertiary: rgba(107, 47, 69, 1);
+  --material-theme-schemes-on-tertiary: rgba(255, 255, 255, 1);
+  --material-theme-schemes-tertiary-container: rgba(165, 95, 119, 1);
+  --material-theme-schemes-on-tertiary-container: rgba(255, 255, 255, 1);
+  --material-theme-schemes-error: rgba(110, 47, 44, 1);
+  --material-theme-schemes-on-error: rgba(255, 255, 255, 1);
+  --material-theme-schemes-error-container: rgba(170, 95, 90, 1);
+  --material-theme-schemes-on-error-container: rgba(255, 255, 255, 1);
+  --material-theme-schemes-background: rgba(253, 247, 255, 1);
+  --material-theme-schemes-on-background: rgba(29, 27, 32, 1);
+  --material-theme-schemes-surface: rgba(253, 247, 255, 1);
+  --material-theme-schemes-on-surface: rgba(28, 27, 32, 1);
+  --material-theme-schemes-surface-variant: rgba(230, 224, 236, 1);
+  --material-theme-schemes-on-surface-variant: rgba(68, 65, 74, 1);
+  --material-theme-schemes-outline: rgba(97, 94, 103, 1);
+  --material-theme-schemes-outline-variant: rgba(125, 121, 131, 1);
+  --material-theme-schemes-inverse-surface: rgba(50, 47, 53, 1);
+  --material-theme-schemes-inverse-on-surface: rgba(245, 239, 247, 1);
+  --material-theme-schemes-inverse-primary: rgba(207, 189, 254, 1);
+  --material-theme-schemes-primary-fixed: rgba(123, 107, 167, 1);
+  --material-theme-schemes-on-primary-fixed: rgba(255, 255, 255, 1);
+  --material-theme-schemes-primary-fixed-dim: rgba(98, 83, 140, 1);
+  --material-theme-schemes-on-primary-fixed-variant: rgba(255, 255, 255, 1);
+  --material-theme-schemes-secondary-fixed: rgba(124, 107, 167, 1);
+  --material-theme-schemes-on-secondary-fixed: rgba(255, 255, 255, 1);
+  --material-theme-schemes-secondary-fixed-dim: rgba(98, 83, 140, 1);
+  --material-theme-schemes-on-secondary-fixed-variant: rgba(255, 255, 255, 1);
+  --material-theme-schemes-tertiary-fixed: rgba(165, 95, 119, 1);
+  --material-theme-schemes-on-tertiary-fixed: rgba(255, 255, 255, 1);
+  --material-theme-schemes-tertiary-fixed-dim: rgba(137, 71, 94, 1);
+  --material-theme-schemes-on-tertiary-fixed-variant: rgba(255, 255, 255, 1);
+  --material-theme-schemes-surface-dim: rgba(222, 216, 224, 1);
+  --material-theme-schemes-surface-bright: rgba(253, 247, 255, 1);
+  --material-theme-schemes-surface-container-lowest: rgba(255, 255, 255, 1);
+  --material-theme-schemes-surface-container-low: rgba(247, 242, 250, 1);
+  --material-theme-schemes-surface-container: rgba(242, 236, 244, 1);
+  --material-theme-schemes-surface-container-high: rgba(236, 230, 238, 1);
+  --material-theme-schemes-surface-container-highest: rgba(230, 225, 233, 1);
+}
+
+[data-material-theme-mode="dark"] {
+  --material-theme-schemes-primary: rgba(208, 188, 254, 1);
+  --material-theme-schemes-surface-tint: rgba(208, 188, 255, 1);
+  --material-theme-schemes-on-primary: rgba(56, 30, 114, 1);
+  --material-theme-schemes-primary-container: rgba(79, 55, 139, 1);
+  --material-theme-schemes-on-primary-container: rgba(234, 221, 255, 1);
+  --material-theme-schemes-secondary: rgba(204, 194, 220, 1);
+  --material-theme-schemes-on-secondary: rgba(51, 45, 65, 1);
+  --material-theme-schemes-secondary-container: rgba(74, 68, 88, 1);
+  --material-theme-schemes-on-secondary-container: rgba(232, 222, 248, 1);
+  --material-theme-schemes-tertiary: rgba(239, 184, 200, 1);
+  --material-theme-schemes-on-tertiary: rgba(73, 37, 50, 1);
+  --material-theme-schemes-tertiary-container: rgba(99, 59, 72, 1);
+  --material-theme-schemes-on-tertiary-container: rgba(255, 216, 228, 1);
+  --material-theme-schemes-error: rgba(242, 184, 181, 1);
+  --material-theme-schemes-on-error: rgba(96, 20, 16, 1);
+  --material-theme-schemes-error-container: rgba(140, 29, 24, 1);
+  --material-theme-schemes-on-error-container: rgba(249, 222, 220, 1);
+  --material-theme-schemes-background: rgba(20, 18, 24, 1);
+  --material-theme-schemes-on-background: rgba(230, 224, 233, 1);
+  --material-theme-schemes-surface: rgba(20, 18, 24, 1);
+  --material-theme-schemes-on-surface: rgba(230, 224, 233, 1);
+  --material-theme-schemes-surface-variant: rgba(73, 69, 79, 1);
+  --material-theme-schemes-on-surface-variant: rgba(202, 196, 208, 1);
+  --material-theme-schemes-outline: rgba(147, 143, 153, 1);
+  --material-theme-schemes-outline-variant: rgba(73, 69, 79, 1);
+  --material-theme-schemes-inverse-surface: rgba(230, 224, 233, 1);
+  --material-theme-schemes-inverse-on-surface: rgba(50, 47, 53, 1);
+  --material-theme-schemes-inverse-primary: rgba(103, 80, 164, 1);
+  --material-theme-schemes-primary-fixed: rgba(234, 221, 255, 1);
+  --material-theme-schemes-on-primary-fixed: rgba(33, 0, 93, 1);
+  --material-theme-schemes-primary-fixed-dim: rgba(208, 188, 255, 1);
+  --material-theme-schemes-on-primary-fixed-variant: rgba(79, 55, 139, 1);
+  --material-theme-schemes-secondary-fixed: rgba(232, 222, 248, 1);
+  --material-theme-schemes-on-secondary-fixed: rgba(29, 25, 43, 1);
+  --material-theme-schemes-secondary-fixed-dim: rgba(204, 194, 220, 1);
+  --material-theme-schemes-on-secondary-fixed-variant: rgba(74, 68, 88, 1);
+  --material-theme-schemes-tertiary-fixed: rgba(255, 216, 228, 1);
+  --material-theme-schemes-on-tertiary-fixed: rgba(49, 17, 29, 1);
+  --material-theme-schemes-tertiary-fixed-dim: rgba(239, 184, 200, 1);
+  --material-theme-schemes-on-tertiary-fixed-variant: rgba(99, 59, 72, 1);
+  --material-theme-schemes-surface-dim: rgba(20, 18, 24, 1);
+  --material-theme-schemes-surface-bright: rgba(59, 56, 62, 1);
+  --material-theme-schemes-surface-container-lowest: rgba(15, 13, 19, 1);
+  --material-theme-schemes-surface-container-low: rgba(29, 27, 32, 1);
+  --material-theme-schemes-surface-container: rgba(33, 31, 38, 1);
+  --material-theme-schemes-surface-container-high: rgba(43, 41, 48, 1);
+  --material-theme-schemes-surface-container-highest: rgba(54, 52, 59, 1);
+}
+

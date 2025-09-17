@@ -1,0 +1,38 @@
+<div class="min-h-screen bg-gradient-to-br from-blue-50 to-indigo-100">
+
+  <!-- Install PWA Banner -->
+  <div 
+    *ngIf="pwaService.promptEvent" 
+    class="fixed top-0 left-0 right-0 bg-blue-600 text-white p-4 z-50 shadow-lg"
+  >
+    <div class="flex items-center justify-between max-w-sm mx-auto">
+      <div class="flex items-center space-x-3">
+        <svg class="w-6 h-6" fill="currentColor" viewBox="0 0 20 20">
+          <path d="M3 4a1 1 0 011-1h12a1 1 0 011 1v2a1 1 0 01-1 1H4a1 1 0 01-1-1V4zM3 10a1 1 0 011-1h6a1 1 0 011 1v6a1 1 0 01-1 1H4a1 1 0 01-1-1v-6zM14 9a1 1 0 00-1 1v6a1 1 0 001 1h2a1 1 0 001-1v-6a1 1 0 00-1-1h-2z"/>
+        </svg>
+        <span class="text-sm font-medium">Install App</span>
+      </div>
+      <div class="flex space-x-2">
+        <button 
+          (click)="pwaService.installPWA()"
+          class="bg-white text-blue-600 px-3 py-1 rounded text-sm font-medium hover:bg-blue-50 transition-colors"
+        >
+          Install
+        </button>
+        <button 
+          (click)="pwaService.dismissPrompt()"
+          class="text-blue-200 hover:text-white transition-colors"
+        >
+          ×
+        </button>
+      </div>
+    </div>
+    
+  </div>
+
+  <!-- Main App Content -->
+  <div [class.pt-20]="pwaService.promptEvent" class="min-h-screen">
+    <router-outlet></router-outlet>
+  </div>
+
+</div>

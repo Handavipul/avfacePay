@@ -1,0 +1,528 @@
+<!-- account-management.component.html - Interactive Cards UI -->
+<div class="authenticated-container">
+  <!-- Success/Error Messages -->
+  <div *ngIf="successMessage" class="alert alert-success">
+    {{ successMessage }}
+  </div>
+  <div *ngIf="errorMessage" class="alert alert-error">
+    {{ errorMessage }}
+  </div>
+
+  <!-- Loading Indicator -->
+  <div *ngIf="isLoading" class="loading-container">
+    <div class="loading-spinner"></div>
+    <div class="loading-text">Loading...</div>
+  </div>
+
+  <!-- Main Account Management Card -->
+  <div class="welcome-back-card account-management-card">
+    <!-- Header -->
+    <div class="welcome-header account-header">
+    <div class="welcome-left">
+      <div class="user-initials" *ngIf="currentUser">
+        {{ getInitials(currentUser.name || currentUser.email) }}
+      </div>
+      <h2 class="welcome-title">My Accounts</h2>
+    </div>
+
+    <div class="welcome-right">
+      <button class="btn btn-secondary btn-sm">
+        <div class="btn-text">← Back </div>
+      </button>
+    </div>
+  </div>
+
+    <!-- Navigation Tabs -->
+    <div class="tab-navigation">
+      <button 
+        class="tab-btn" 
+        [class.active]="currentView === 'overview'"
+        (click)="showOverview()">
+        📊 Overview
+      </button>
+      <button 
+        class="tab-btn" 
+        [class.active]="currentView === 'cards'"
+        (click)="showCards()">
+        💳 Cards ({{ savedCards.length }})
+      </button>
+      <button 
+        class="tab-btn" 
+        [class.active]="currentView === 'bank-accounts'"
+        (click)="showBankAccounts()">
+        🏦 Accounts ({{ bankAccounts.length }})
+      </button>
+    </div>
+
+    <!-- Overview Section -->
+    <div *ngIf="currentView === 'overview'" class="content-section">
+      <!-- Stats Row -->
+      <!-- <div class="overview-stats">
+        <div class="stat-card balance">
+          <div class="stat-icon">💰</div>
+          <div class="stat-content">
+            <div class="stat-label">Total Balance</div>
+            <div class="stat-value">${{ getTotalBalance() | number:'1.2-2' }}</div>
+          </div>
+        </div>
+        <div class="stat-card payments">
+          <div class="stat-icon">💳</div>
+          <div class="stat-content">
+            <div class="stat-label">This Month</div>
+            <div class="stat-value">${{ getMonthlyPayments() | number:'1.2-2' }}</div>
+          </div>
+        </div>
+      </div> -->
+
+      <div class="overview-grid">
+        <!-- Cards Summary with Realistic Preview -->
+        <div class="summary-card">
+          <div class="summary-header">
+            <h3 class="summary-title">💳 Payment Cards</h3>
+            <button class="add-btn" (click)="showAddCard()">+ Add</button>
+          </div>
+          <div class="summary-content">
+            <div class="summary-count">{{ savedCards.length }} {{ savedCards.length === 1 ? 'Card' : 'Cards' }}</div>
+            
+            <div *ngIf="savedCards.length === 0" class="empty-state">
+              <p>No cards added yet</p>
+              <button class="btn primary small" (click)="showAddCard()">Add First Card</button>
+            </div>
+
+            <div *ngIf="savedCards.length > 0"  class="realistic-cards-preview" 
+            [ngClass]="{
+              'collapsed': !isCardsExpanded && savedCards.length > 3,
+              'expanded': isCardsExpanded
+            }"
+            (click)="onCardPreviewClick($event)">
+          <div 
+            *ngFor="let card of getDisplayedCards()" 
+            class="mini-card" 
+            [ngClass]="getCardClass(card.brand)"
+            (click)="onCardClick($event, card)">
+            <div class="mini-card-brand">{{ card.brand }}</div>
+            <div class="mini-card-number">•••• {{ card.last_four }}</div>
+            <div class="mini-card-name">{{ card.holder_name }}</div>
+            <div *ngIf="card.is_primary" class="primary-badge">Primary</div>
+          </div>
+        </div>
+          </div>
+        </div>
+
+        <!-- Bank Accounts Summary -->
+        <div class="summary-card">
+          <div class="summary-header">
+            <h3 class="summary-title">🏦 Bank Accounts</h3>
+            <button class="add-btn" (click)="showAddBank()">+ Add</button>
+          </div>
+          <div class="summary-content">
+            <div class="summary-count">{{ bankAccounts.length }} {{ bankAccounts.length === 1 ? 'Account' : 'Accounts' }}</div>
+            
+            <div *ngIf="bankAccounts.length === 0" class="empty-state">
+              <p>No accounts added yet</p>
+              <button class="btn primary small" (click)="showAddBank()">Add First Account</button>
+            </div>
+
+            <div *ngIf="bankAccounts.length > 0" class="bank-account-preview">
+              <div 
+                *ngFor="let account of bankAccounts.slice(0, 2)" 
+                class="mini-bank-card"
+                (click)="showBankAccounts()">
+                <div class="bank-icon">🏦</div>
+                <div class="bank-details">
+                  <div class="bank-name">{{ account.bank_name }}</div>
+                  <div class="account-info">{{ account.account_type | titlecase }} {{ account.masked_account }}</div>
+                </div>
+                <div *ngIf="account.is_primary" class="primary-badge">Primary</div>
+              </div>
+            </div>
+          </div>
+        </div>
+      </div>
+
+      <!-- Recent Activity -->
+      <div class="recent-activity">
+        <div class="activity-header">
+          <h3 class="activity-title">Recent Activity</h3>
+          <button class="view-all-btn" (click)="showAllActivity()">View All</button>
+        </div>
+        <div class="activity-list">
+          <div *ngFor="let activity of recentActivities.slice(0, 3)" class="activity-item">
+            <div class="activity-icon" [ngClass]="activity.type">{{ activity.icon }}</div>
+            <div class="activity-details">
+              <div class="activity-description">{{ activity.description }}</div>
+              <div class="activity-date">{{ activity.date | date:'MMM d, h:mm a' }}</div>
+            </div>
+            <div class="activity-amount" [ngClass]="{'positive': activity.amount > 0}">
+              {{ activity.amount > 0 ? '+' : '' }}${{ activity.amount | number:'1.2-2' }}
+            </div>
+          </div>
+        </div>
+      </div>
+
+      <!-- Quick Actions -->
+      <div class="quick-actions account-actions">
+        <button class="btn primary large" (click)="makePayment()">
+          <div class="btn-text">💳 Make Payment</div>
+        </button>
+        <div class="quick-action-row">
+          <button class="btnsecondary" (click)="showCards()">
+            <div class="btn-text">💳 Manage Cards</div>
+          </button>
+          <button class="btn secondary" (click)="showBankAccounts()">
+            <div class="btn-text">🏦 Manage Accounts</div>
+          </button>
+        </div>
+      </div>
+    </div>
+
+    <!-- Cards Section -->
+    <div *ngIf="currentView === 'cards'" class="content-section">
+      <div class="section-header">
+        <h3 class="section-title">Payment Cards</h3>
+        <button class="btn primary small" (click)="showAddCard()">
+          <span class="btn-text">+ Add Card</span>
+        </button>
+      </div>
+
+      <div *ngIf="savedCards.length === 0" class="empty-state-large">
+        <div class="empty-icon">💳</div>
+        <p>No cards added yet</p>
+        <button class="btn primary" (click)="showAddCard()">Add Your First Card</button>
+      </div>
+
+      <div *ngIf="savedCards.length > 0" class="realistic-cards-grid">
+        <div 
+          *ngFor="let card of savedCards; trackBy: trackByCardId" 
+          class="realistic-card" 
+          [ngClass]="getCardClass(card.brand)"
+          (click)="selectCard(card)"
+          [attr.data-card-id]="card.id">
+          
+          <div class="card-chip"></div>
+          <div class="card-brand">{{ card.brand.toUpperCase() }}</div>
+          
+          <div class="card-number">
+            {{ formatCardNumberDisplay(card.brand, card.last_four) }}
+          </div>
+          
+          <div class="card-holder">
+            <div class="card-label">CARDHOLDER</div>
+            <div class="card-name">{{ card.holder_name.toUpperCase() }}</div>
+          </div>
+          
+          <div class="card-expiry">
+            <div class="card-label">EXPIRES</div>
+            <div class="card-date">{{ card.expiry_month }}/{{ card.expiry_year.toString().slice(-2) }}</div>
+          </div>
+          
+          <div class="card-actions" (click)="$event.stopPropagation()">
+            <button 
+              *ngIf="!card.is_primary" 
+              class="card-action-btn" 
+              (click)="setPrimaryCard(card.id)" 
+              title="Set as Primary">⭐</button>
+            <button 
+              class="card-action-btn danger" 
+              (click)="removeCard(card.id,!!card.is_primary)" 
+              title="Remove">🗑️</button>
+          </div>
+          
+          <div *ngIf="card.is_primary" class="card-primary-badge">Primary</div>
+        </div>
+      </div>
+
+      <!-- Card Details Panel -->
+      <div *ngIf="selectedCard" class="card-details-panel">
+        <div class="details-header">
+          <h4>Card Details</h4>
+          <button class="close-btn" (click)="closeCardDetails()">✕</button>
+        </div>
+        <div class="details-content">
+          <div class="detail-row">
+            <span class="detail-label">Card Number:</span>
+            <span class="detail-value">•••• •••• •••• {{ selectedCard.last_four }}</span>
+          </div>
+          <div class="detail-row">
+            <span class="detail-label">Cardholder:</span>
+            <span class="detail-value">{{ selectedCard.holder_name }}</span>
+          </div>
+          <div class="detail-row">
+            <span class="detail-label">Expires:</span>
+            <span class="detail-value">{{ selectedCard.expiry_month }}/{{ selectedCard.expiry_year }}</span>
+          </div>
+          <div class="detail-row">
+            <span class="detail-label">Status:</span>
+            <span class="detail-value">{{ selectedCard.is_primary ? 'Primary Card' : 'Secondary Card' }}</span>
+          </div>
+        </div>
+      </div>
+    </div>
+
+    <!-- Bank Accounts Section -->
+    <div *ngIf="currentView === 'bank-accounts'" class="content-section">
+      <div class="section-header">
+        <h3 class="section-title">Bank Accounts</h3>
+        <button class="btn primary small" (click)="showAddBank()">
+          <span class="btn-text">+ Add Account</span>
+        </button>
+      </div>
+
+      <div *ngIf="bankAccounts.length === 0" class="empty-state-large">
+        <div class="empty-icon">🏦</div>
+        <p>No bank accounts added yet</p>
+        <button class="btn primary" (click)="showAddBank()">Add Your First Account</button>
+      </div>
+
+      <div *ngIf="bankAccounts.length > 0" class="bank-accounts-grid">
+        <div 
+          *ngFor="let account of bankAccounts; trackBy: trackByAccountId" 
+          class="bank-account-card"
+          (click)="selectBankAccount(account)"
+          [attr.data-account-id]="account.id">
+          
+          <div class="bank-header">
+            <div class="bank-icon">🏦</div>
+            <div class="bank-info">
+              <div class="bank-name">{{ account.bank_name }}</div>
+              <div class="account-type-badge" [ngClass]="account.account_type">
+                {{ account.account_type | titlecase }}
+              </div>
+            </div>
+            <div class="account-actions" (click)="$event.stopPropagation()">
+              <button 
+                *ngIf="!account.is_primary" 
+                class="action-btn" 
+                (click)="setPrimaryBankAccount(account.id)" 
+                title="Set as Primary">⭐</button>
+              <button 
+                class="action-btn danger" 
+                (click)="removeBankAccount(account.id,true)" 
+                title="Remove">🗑️</button>
+            </div>
+          </div>
+          
+          <div class="account-details">
+            <div class="account-number">{{ account.masked_account }}</div>
+            <div class="routing-number">Routing: •••••{{ account.routing_number?.slice(-4) }}</div>
+          </div>
+          
+          <div class="account-balance">
+            <div class="balance-label">Available Balance</div>
+            <div class="balance-amount">${{ getAccountBalance(account.id) | number:'1.2-2' }}</div>
+          </div>
+          
+          <div *ngIf="account.is_primary" class="bank-primary-badge">Primary</div>
+        </div>
+      </div>
+
+      <!-- Bank Account Details Panel -->
+      <div *ngIf="selectedBankAccount" class="account-details-panel">
+        <div class="details-header">
+          <h4>Account Details</h4>
+          <button class="close-btn" (click)="closeBankDetails()">✕</button>
+        </div>
+        <div class="details-content">
+          <div class="detail-row">
+            <span class="detail-label">Bank:</span>
+            <span class="detail-value">{{ selectedBankAccount.bank_name }}</span>
+          </div>
+          <div class="detail-row">
+            <span class="detail-label">Account Type:</span>
+            <span class="detail-value">{{ selectedBankAccount.account_type | titlecase }}</span>
+          </div>
+          <div class="detail-row">
+            <span class="detail-label">Account Number:</span>
+            <span class="detail-value">{{ selectedBankAccount.masked_account }}</span>
+          </div>
+          <div class="detail-row">
+            <span class="detail-label">Status:</span>
+            <span class="detail-value">{{ selectedBankAccount.is_primary ? 'Primary Account' : 'Secondary Account' }}</span>
+          </div>
+        </div>
+      </div>
+    </div>
+
+    <!-- Add Card Form -->
+    <div *ngIf="currentView === 'add-card'" class="content-section">
+      <div class="section-header">
+        <h3 class="section-title">Add New Card</h3>
+        <button class="btn btn-secondary btn-sm" (click)="showCards()">
+          <span class="btn-text">← Back</span>
+        </button>
+      </div>
+
+      <div class="add-card-container">
+        <!-- Live Card Preview -->
+        <div class="card-preview">
+          <div class="preview-card" [ngClass]="getPreviewCardClass()">
+            <div class="card-chip"></div>
+            <div class="card-brand">{{ getPreviewBrand() }}</div>
+            <div class="card-number">{{ getPreviewNumber() }}</div>
+            <div class="card-holder">
+              <div class="card-label">CARDHOLDER</div>
+              <div class="card-name">{{ getPreviewName() }}</div>
+            </div>
+            <div class="card-expiry">
+              <div class="card-label">EXPIRES</div>
+              <div class="card-date">{{ getPreviewExpiry() }}</div>
+            </div>
+          </div>
+        </div>
+
+        <div class="form-container">
+          <div class="form-group">
+            <label class="form-label">Card Number</label>
+            <input 
+              type="text" 
+              class="form-input"
+              [(ngModel)]="newCard.number"
+              (input)="formatCardNumber($event)"
+              placeholder="1234 5678 9012 3456"
+              maxlength="19">
+          </div>
+
+          <div class="form-group">
+            <label class="form-label">Cardholder Name</label>
+            <input 
+              type="text" 
+              class="form-input"
+              [(ngModel)]="newCard.holder_name"
+              placeholder="John Doe">
+          </div>
+
+          <div class="form-row">
+            <div class="form-group">
+              <label class="form-label">MM</label>
+              <input 
+                type="text" 
+                class="form-input"
+                [(ngModel)]="newCard.expiry_month"
+                (input)="formatExpiry($event, 'month')"
+                placeholder="MM"
+                maxlength="2">
+            </div>
+            <div class="form-group">
+              <label class="form-label">YY</label>
+              <input 
+                type="text" 
+                class="form-input"
+                [(ngModel)]="newCard.expiry_year"
+                (input)="formatExpiry($event, 'year')"
+                placeholder="YY"
+                maxlength="2">
+            </div>
+            <div class="form-group">
+              <label class="form-label">CVV</label>
+              <input 
+                type="password" 
+                class="form-input"
+                [(ngModel)]="newCard.cvv"
+                placeholder="123"
+                maxlength="4">
+            </div>
+          </div>
+
+          <div class="form-group">
+            <label class="checkbox-container">
+              <input 
+                type="checkbox" 
+                [(ngModel)]="newCard.is_primary"
+                class="checkbox">
+              <span class="checkbox-text">Set as primary card</span>
+            </label>
+          </div>
+
+          <div class="form-actions">
+            <button class="btn primary" (click)="addCard()" [disabled]="!isValidCardForm()">
+              <span class="btn-text">Add Card</span>
+            </button>
+            <button class="btn secondary" (click)="showCards()">
+              <span class="btn-text">Cancel</span>
+            </button>
+          </div>
+        </div>
+      </div>
+    </div>
+
+    <!-- Add Bank Account Form -->
+    <div *ngIf="currentView === 'add-bank'" class="content-section form-section">
+      <div class="section-header">
+        <h3 class="section-title">Add Bank Account</h3>
+        <button class="btn btn-secondary btn-sm" (click)="showBankAccounts()">
+          <span class="btn-text">← Back</span>
+        </button>
+      </div>
+
+      <div class="form-container">
+        <div class="form-group">
+          <label class="form-label">Account Name</label>
+          <input 
+            type="text" 
+            class="form-input"
+            [(ngModel)]="newBankAccount.account_name"
+            placeholder="My Primary Checking">
+        </div>
+
+        <div class="form-group">
+          <label class="form-label">Bank Name</label>
+          <input 
+            type="text" 
+            class="form-input"
+            [(ngModel)]="newBankAccount.bank_name"
+            placeholder="Chase Bank">
+        </div>
+
+        <div class="form-row">
+          <div class="form-group">
+            <label class="form-label">Account Number</label>
+            <input 
+              type="text" 
+              class="form-input"
+              [(ngModel)]="newBankAccount.account_number"
+              (input)="formatAccountNumber($event)"
+              placeholder="12345678901234567">
+          </div>
+          <div class="form-group">
+            <label class="form-label">Routing Number</label>
+            <input 
+              type="text" 
+              class="form-input"
+              [(ngModel)]="newBankAccount.routing_number"
+              (input)="formatRoutingNumber($event)"
+              placeholder="021000021"
+              maxlength="9">
+          </div>
+        </div>
+
+        <div class="form-group">
+          <label class="form-label">Account Type</label>
+          <select class="form-input" [(ngModel)]="newBankAccount.account_type">
+            <option value="checking">Checking</option>
+            <option value="savings">Savings</option>
+          </select>
+        </div>
+
+        <div class="form-group">
+          <label class="checkbox-container">
+            <input 
+              type="checkbox" 
+              [(ngModel)]="newBankAccount.is_primary"
+              class="checkbox">
+            <span class="checkbox-text">Set as primary account</span>
+          </label>
+        </div>
+
+        <div class="form-actions">
+          <button class="btn primary" (click)="addBankAccount()" [disabled]="!isValidBankForm()">
+            <span class="btn-text">Add Account</span>
+          </button>
+          <button class="btn secondary" (click)="showBankAccounts()">
+            <span class="btn-text">Cancel</span>
+          </button>
+        </div>
+      </div>
+    </div>
+  </div>
+</div>
+

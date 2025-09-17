@@ -1,0 +1,95 @@
+<!-- payment-success.component.html -->
+<div class="payment-success-container">
+  
+  <!-- Loading State -->
+  <div *ngIf="isLoading" class="loading-container">
+    <div class="loading-spinner"></div>
+    <div class="loading-text">{{ loadingText }}</div>
+    <div class="loading-subtext">Please don't close this window</div>
+  </div>
+
+  <!-- Error State -->
+  <div *ngIf="errorMessage && !isLoading" class="error-container">
+    <div class="error-icon">❌</div>
+    <h2>Payment Error</h2>
+    <p>{{ errorMessage }}</p>
+    <div class="error-actions">
+      <button class="btn primary" (click)="goToDashboard()">
+        Go to Dashboard
+      </button>
+    </div>
+  </div>
+
+  <!-- Success Animation -->
+  <div *ngIf="showSuccessAnimation" class="success-overlay">
+    <div class="success-container">
+      
+      <!-- Success Checkmark Animation -->
+      <div class="success-checkmark">
+        <div class="checkmark-circle">
+          <div class="checkmark-stem"></div>
+          <div class="checkmark-kick"></div>
+        </div>
+      </div>
+      
+      <!-- Success Content -->
+      <div class="success-content">
+        <h2>Payment Successful! 🎉</h2>
+        <div class="payment-amount">
+          {{ formatCurrency(paymentAmount) }}
+        </div>
+        
+        <!-- Payment Details -->
+        <div class="payment-details">
+          <div class="detail-row">
+            <span class="detail-label">Transaction ID:</span>
+            <span class="detail-value">{{ transactionId }}</span>
+          </div>
+          <div class="detail-row">
+            <span class="detail-label">Payment Method:</span>
+            <span class="detail-value">
+              <span class="method-icon">{{ getPaymentMethodIcon() }}</span>
+              {{ getPaymentMethodText() }}
+            </span>
+          </div>
+          <div class="detail-row" *ngIf="mandateCreated">
+            <span class="detail-label">Future Payments:</span>
+            <span class="detail-value">✅ Payment method saved</span>
+          </div>
+        </div>
+        
+        <!-- Success Actions -->
+        <div class="success-actions">
+          <button class="btn primary large" (click)="closeSuccessAnimation()">
+            <span>Continue to Dashboard</span>
+          </button>
+        </div>
+        
+        <!-- Additional Info -->
+        <div class="success-footer">
+          <p>A receipt has been sent to your email address.</p>
+          <div class="mandate-info" *ngIf="mandateCreated">
+            <div class="mandate-badge">
+              <span class="badge-icon">⚡</span>
+              <span class="badge-text">Quick Pay Enabled</span>
+            </div>
+            <p class="mandate-description">
+              Your payment method has been securely saved for faster future payments.
+            </p>
+          </div>
+        </div>
+      </div>
+    </div>
+  </div>
+
+  <!-- Simple Success State (fallback) -->
+  <div *ngIf="!isLoading && !errorMessage && !showSuccessAnimation" class="simple-success">
+    <div class="success-icon">✅</div>
+    <h2>Payment Completed</h2>
+    <p>{{ successMessage }}</p>
+    <button class="btn primary" (click)="goToDashboard()">
+      Continue
+    </button>
+  </div>
+</div>
+

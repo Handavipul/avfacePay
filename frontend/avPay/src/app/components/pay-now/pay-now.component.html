@@ -1,0 +1,792 @@
+<!-- pay-now.component.html - Payment Processing Component -->
+<div class="authenticated-container">
+  <!-- Success/Error Messages -->
+  <div *ngIf="successMessage" class="alert alert-success">
+    {{ successMessage }}
+  </div>
+  <div *ngIf="errorMessage" class="alert alert-error">
+    {{ errorMessage }}
+  </div>
+
+  <!-- Loading Indicator -->
+  <div *ngIf="isLoading" class="loading-container">
+    <div class="loading-spinner"></div>
+    <div class="loading-text">{{ loadingText }}</div>
+  </div>
+
+  <!-- Payment Success Animation -->
+  <div *ngIf="showSuccessAnimation" class="payment-success-overlay">
+    <div class="success-animation-container">
+      <div class="success-checkmark">
+        <div class="checkmark-circle">
+          <div class="checkmark-stem"></div>
+          <div class="checkmark-kick"></div>
+        </div>
+      </div>
+      <div class="success-text">
+        <h3>Payment Successful!</h3>
+        <p>{{ formatCurrency(paymentAmount) }} has been processed</p>
+        <div class="success-details">
+          <div class="payment-method-used">
+            <span class="method-icon">{{ getPaymentMethodIcon() }}</span>
+            <span class="method-text">{{ getPaymentMethodText() }}</span>
+          </div>
+          <div class="transaction-id">Transaction ID: {{ transactionId }}</div>
+        </div>
+      </div>
+      <button class="btn primary" (click)="closeSuccessAnimation()">
+        <div class="btn-text">Done</div>
+      </button>
+    </div>
+  </div>
+
+  <!-- Camera Verification Modal -->
+  <div *ngIf="showCameraVerification" class="camera-verification-overlay">
+    <div class="camera-verification-container">
+      <div class="camera-header">
+        <h3>Verify Payment</h3>
+        <p>Please verify your identity to complete the payment of {{ formatCurrency(paymentAmount) }}</p>
+      </div>
+      
+      <div class="camera-content">
+        <app-auth 
+          [mode]="'verify'"
+          [email]="currentUser?.email"
+          (onSuccess)="handleVerificationSuccess($event)"
+          (onError)="handleVerificationError($event)"
+          (onCancel)="cancelVerification()">
+        </app-auth>
+      </div>
+      
+      <div class="camera-actions">
+        <button class="btn secondary" (click)="cancelVerification()">
+          <div class="btn-text">Cancel Payment</div>
+        </button>
+      </div>
+    </div>
+  </div>
+
+  <!-- Main Pay Now Card -->
+  <div class="welcome-back-card pay-now-card" *ngIf="!showSuccessAnimation">
+ 
+    <div class="welcome-header account-header">
+      <div class="welcome-left">
+        <div class="user-initials" *ngIf="currentUser">
+          {{ getInitials(currentUser.name || currentUser.email) }}
+        </div>
+        <h2 class="welcome-title">Pay Now</h2>
+      </div>
+
+      <div class="welcome-right">
+        <button class="btn btn-secondary btn-sm" (click)="goBack()">
+          <div class="btn-text">← Back </div>
+        </button>
+      </div>
+    </div>
+
+    <!-- Payment Form -->
+    <div class="content-section" *ngIf="!showCameraVerification">
+      
+      <!-- Amount Input Section -->
+      <div class="payment-amount-section">
+        <div class="amount-input-container">
+          <div class="currency-symbol">$</div>
+          <input 
+            type="text" 
+            class="amount-input"
+            [(ngModel)]="paymentAmountDisplay"
+            (input)="onAmountInput($event)"
+            (focus)="onAmountFocus()"
+            (blur)="onAmountBlur()"
+            placeholder="0.00"
+            maxlength="12">
+        </div>
+        
+        <!-- Quick Amount Buttons -->
+        <div class="quick-amounts">
+          <button 
+            *ngFor="let amount of quickAmountOptions" 
+            class="quick-amount-btn"
+            (click)="setQuickAmount(amount)">
+            {{ formatCurrency(amount) }}
+          </button>
+        </div>
+      </div>
+
+      <!-- Payment Type Selection (Card vs Bank Transfer vs Others) -->
+      <div class="payment-type-section">
+        <div class="section-header">
+          <h3 class="section-title">Payment Type</h3>
+        </div>
+        
+        <div class="payment-type-options">
+          <div class="payment-type-option" 
+               [class.selected]="paymentType === 'card'"
+               (click)="setPaymentType('card')">
+            <div class="payment-type-icon">💳</div>
+            <div class="payment-type-info">
+              <div class="payment-type-title">Card Transfer</div>
+              <div class="payment-type-desc">Pay with credit or debit card</div>
+              <div class="payment-type-details" *ngIf="paymentType === 'card'">
+                <div class="detail-item">• Instant transfer</div>
+                <div class="detail-item">• Standard processing fees</div>
+                <div class="detail-item">• Secure card processing</div>
+              </div>
+            </div>
+          </div>
+          
+          <div class="payment-type-option" 
+               [class.selected]="paymentType === 'bank'"
+               (click)="setPaymentType('bank')">
+            <div class="payment-type-icon">🏦</div>
+            <div class="payment-type-info">
+              <div class="payment-type-title">Bank Transfer</div>
+              <div class="payment-type-desc">Transfer from bank account</div>
+              <div class="payment-type-details" *ngIf="paymentType === 'bank'">
+                <div class="detail-item">• Lower fees</div>
+                <div class="detail-item">• Domestic or international</div>
+                <div class="detail-item">• ACH or wire transfer</div>
+              </div>
+            </div>
+          </div>
+
+          <div class="payment-type-option" 
+               [class.selected]="paymentType === 'others'"
+               (click)="setPaymentType('others')">
+            <div class="payment-type-icon">🌐</div>
+            <div class="payment-type-info">
+              <div class="payment-type-title">Other Payment Methods</div>
+              <div class="payment-type-desc">Pay via Mollie, Stripe & more</div>
+              <div class="payment-type-details" *ngIf="paymentType === 'others'">
+                <div class="detail-item">• Multiple payment options</div>
+                <div class="detail-item">• Secure third-party processing</div>
+                <div class="detail-item">• Digital wallets supported</div>
+              </div>
+            </div>
+          </div>
+        </div>
+      </div>
+
+      <!-- Customer & Stored Payment Methods Section -->
+  <div class="stored-methods-section" *ngIf="paymentType === 'others' && selectedPaymentProvider === 'mollie'">
+    <div class="section-header">
+      <h3 class="section-title">👤 Customer & Stored Payment Methods</h3>
+    </div>
+    
+    <!-- Customer Status -->
+    <div class="customer-status-card" *ngIf="currentUser">
+      <div class="customer-info">
+        <div class="customer-name">{{ currentUser.name || currentUser.email }}</div>
+        <!-- <div class="customer-email">{{ currentUser.email }}</div> -->
+      </div>
+      <div class="mandate-status" [ngClass]="hasValidMandates ? 'valid' : 'none'">
+        <span>{{ hasValidMandates ? '✓' : '⏱' }}</span>
+        {{ hasValidMandates ? 'Has Stored Methods' : 'No Stored Methods' }}
+      </div>
+    </div>
+
+      <!-- Stored Payment Methods -->
+      <div class="stored-mandates">
+
+        <div *ngIf="loadingStoredMandates" class="mandates-loader">
+            <div class="loader-container">
+              <div class="spinner-small"></div>
+              <span class="loader-text">Loading stored payment methods...</span>
+            </div>
+          </div>
+
+        <div *ngIf="!loadingStoredMandates && customerMandates.length > 0">
+          <div class="mandates-header">
+          <h4>Stored Payment Methods</h4>
+          <span class="mandates-count">{{ customerMandates.length }} active</span>
+        </div>
+        
+        <div class="mandate-list">
+          <div 
+            *ngFor="let mandate of customerMandates" 
+            class="mandate-item"
+            [class.selected]="selectedMandateId === mandate.id"
+            (click)="selectStoredMandate(mandate)">
+            
+            <div class="mandate-icon">💳</div>
+            <div class="mandate-details">
+              <div class="mandate-name">{{ getMandateDisplayName(mandate) }}</div>
+              <div class="mandate-info">{{ mandate.method }} • Created {{ mandate.createdAt | date:'short' }}</div>
+            </div>
+            <div class="mandate-status-badge valid">Active</div>
+          </div>
+        </div>
+        </div>
+        
+      </div>
+
+      <!-- Payment Method Choice -->
+      <div class="payment-method-choice">
+        <div class="choice-options">
+          <button 
+            class="choice-btn"
+            [class.selected]="useStoredMethod && hasValidMandates"
+            [disabled]="!hasValidMandates"
+            (click)="setUseStoredMethod(true)">
+            <span class="choice-icon">⚡</span>
+            <div class="choice-content">
+              <div class="choice-title">Use Stored Method</div>
+              <div class="choice-desc">Instant payment, no redirect</div>
+            </div>
+          </button>
+          
+          <button 
+            class="choice-btn"
+            [class.selected]="!useStoredMethod"
+            (click)="setUseStoredMethod(false)">
+            <span class="choice-icon">🆕</span>
+            <div class="choice-content">
+              <div class="choice-title">Add New Method</div>
+              <div class="choice-desc">Setup new payment method</div>
+            </div>
+          </button>
+        </div>
+      </div>
+    </div>
+
+      <!-- Third-Party Payment Provider Selection (only shown when Others is selected) -->
+      <div class="payment-provider-section" *ngIf="paymentType === 'others'">
+        <div class="section-header">
+          <h3 class="section-title">Payment Provider</h3>
+        </div>
+        
+        <div class="payment-provider-options">
+          <div class="provider-option" 
+               [class.selected]="selectedPaymentProvider === 'mollie'"
+               (click)="setPaymentProvider('mollie')">
+            <div class="provider-logo">
+              <div class="mollie-logo">M</div>
+            </div>
+            <div class="provider-info">
+              <div class="provider-title">Mollie</div>
+              <div class="provider-desc">European payment processor</div>
+              <div class="provider-details" *ngIf="selectedPaymentProvider === 'mollie'">
+                <div class="detail-item">• Credit/Debit cards</div>
+                <div class="detail-item">• PayPal, Apple Pay, Google Pay</div>
+                <div class="detail-item">• SEPA, Bancontact, iDEAL</div>
+                <div class="detail-item">• Bank transfers</div>
+              </div>
+            </div>
+          </div>
+          
+          <div class="provider-option" 
+               [class.selected]="selectedPaymentProvider === 'stripe'"
+               (click)="setPaymentProvider('stripe')">
+            <div class="provider-logo">
+              <div class="stripe-logo">S</div>
+            </div>
+            <div class="provider-info">
+              <div class="provider-title">Stripe</div>
+              <div class="provider-desc">Global payment platform</div>
+              <div class="provider-details" *ngIf="selectedPaymentProvider === 'stripe'">
+                <div class="detail-item">• All major credit cards</div>
+                <div class="detail-item">• Apple Pay, Google Pay</div>
+                <div class="detail-item">• ACH, wire transfers</div>
+                <div class="detail-item">• Buy now, pay later</div>
+              </div>
+            </div>
+          </div>
+        </div>
+
+        <!-- Payment Method Selection for Selected Provider -->
+        <div class="provider-payment-methods" *ngIf="selectedPaymentProvider">
+          <div class="section-header">
+            <h3 class="section-title">Available Payment Methods</h3>
+          </div>
+          
+          <div class="provider-methods-grid">
+            <div 
+              *ngFor="let method of getAvailableProviderMethods()" 
+              class="provider-method-option"
+              [class.selected]="selectedProviderMethod === method.id"
+              (click)="selectProviderMethod(method)">
+              <div class="method-icon">{{ method.icon }}</div>
+              <div class="method-label">{{ method.name }}</div>
+            </div>
+          </div>
+        </div>
+      </div>
+
+      <!-- Bank Transfer Type Selection (only shown when Bank Transfer is selected) -->
+      <div class="transfer-type-section" *ngIf="paymentType === 'bank'">
+        <div class="section-header">
+          <h3 class="section-title">Transfer Type</h3>
+        </div>
+        
+        <div class="transfer-type-options">
+          <div class="transfer-option" 
+               [class.selected]="transferType === 'domestic'"
+               (click)="setTransferType('domestic')">
+            <div class="transfer-icon">🏠</div>
+            <div class="transfer-info">
+              <div class="transfer-title">Domestic Transfer</div>
+              <div class="transfer-desc">Within the same country</div>
+              <div class="transfer-details" *ngIf="transferType === 'domestic'">
+                <div class="detail-item">• Usually processed same day</div>
+                <div class="detail-item">• Lower fees</div>
+                <div class="detail-item">• No currency conversion</div>
+              </div>
+            </div>
+          </div>
+          
+          <div class="transfer-option" 
+               [class.selected]="transferType === 'international'"
+               (click)="setTransferType('international')">
+            <div class="transfer-icon">🌎</div>
+            <div class="transfer-info">
+              <div class="transfer-title">International Transfer</div>
+              <div class="transfer-desc">Cross-border transfer</div>
+              <div class="transfer-details" *ngIf="transferType === 'international'">
+                <div class="detail-item">• 1-3 business days</div>
+                <div class="detail-item">• Currency conversion applied</div>
+                <div class="detail-item">• Additional fees may apply</div>
+              </div>
+            </div>
+          </div>
+        </div>
+        
+        <!-- Exchange Rate Information (for international) -->
+        <div class="exchange-rate-info" *ngIf="transferType === 'international' && exchangeRate">
+          <div class="rate-display">
+            <span class="rate-label">Exchange Rate:</span>
+            <span class="rate-value">1 {{sourceCurrency}} = {{exchangeRate.rate}} {{targetCurrency}}</span>
+          </div>
+          <div class="rate-timestamp">Last updated: {{exchangeRate.timestamp | date:'short'}}</div>
+        </div>
+      </div>
+
+      <!-- Recipient Account Selection (for Bank Transfers) -->
+      <div class="recipient-account-section" *ngIf="paymentType === 'bank' && transferType">
+        <div class="section-header">
+          <h3 class="section-title">Recipient Account</h3>
+        </div>
+        
+        <div class="account-selection">
+          <div class="account-type-toggle">
+            <button class="toggle-btn" 
+                    [class.active]="recipientAccountType === 'hsbc'"
+                    (click)="setRecipientAccountType('hsbc')">
+              HSBC Account
+            </button>
+            <button class="toggle-btn" 
+                    [class.active]="recipientAccountType === 'external'"
+                    (click)="setRecipientAccountType('external')">
+              External Bank
+            </button>
+          </div>
+          
+          <!-- HSBC Account Selection -->
+          <div class="account-selector" *ngIf="recipientAccountType === 'hsbc'">
+            <label class="input-label">Select Recipient Account</label>
+            <select class="form-select" [(ngModel)]="selectedRecipientAccount">
+              <option *ngFor="let account of recipientHSBCAccounts" [value]="account.id">
+                {{account.account_name}} (•••• {{account.last_four}})
+              </option>
+              <option value="new">Add new HSBC account</option>
+            </select>
+          </div>
+          
+          <!-- External Bank Details -->
+          <div class="external-bank-details" *ngIf="recipientAccountType === 'external'">
+            <div class="recipient-input-group">
+              <label class="input-label">Bank Name</label>
+              <input type="text" class="form-input" [(ngModel)]="externalBankDetails.name" placeholder="Bank name">
+            </div>
+            
+            <div class="recipient-input-group">
+              <label class="input-label">Account Number</label>
+              <input type="text" class="form-input" [(ngModel)]="externalBankDetails.accountNumber" placeholder="Account number">
+            </div>
+            
+            <div class="recipient-input-group">
+              <label class="input-label">Routing Number</label>
+              <input type="text" class="form-input" [(ngModel)]="externalBankDetails.routingNumber" placeholder="Routing number">
+            </div>
+            
+            <!-- Additional fields for international transfers -->
+            <div *ngIf="transferType === 'international'" class="international-fields">
+              <div class="recipient-input-group">
+                <label class="input-label">SWIFT/BIC Code</label>
+                <input type="text" class="form-input" [(ngModel)]="externalBankDetails.swiftCode" placeholder="SWIFT/BIC code">
+              </div>
+              
+              <div class="recipient-input-group">
+                <label class="input-label">IBAN (if applicable)</label>
+                <input type="text" class="form-input" [(ngModel)]="externalBankDetails.iban" placeholder="IBAN">
+              </div>
+              
+              <div class="recipient-input-group">
+                <label class="input-label">Recipient Country</label>
+                <select class="form-select" [(ngModel)]="externalBankDetails.country">
+                  <option *ngFor="let country of countries" [value]="country.code">
+                    {{country.name}}
+                  </option>
+                </select>
+              </div>
+            </div>
+          </div>
+        </div>
+      </div>
+
+      <!-- Payment Method Selection (for Card Transfers) -->
+      <div class="payment-method-section" *ngIf="paymentType === 'card'">
+        <div class="section-header">
+          <h3 class="section-title">Select Card</h3>
+          <button class="change-method-btn" (click)="showPaymentMethods()">
+            Change
+          </button>
+        </div>
+
+        <!-- Selected Payment Method Display -->
+        <div class="selected-payment-method" *ngIf="selectedPaymentMethod">
+          
+          <!-- Card Display -->
+          <div *ngIf="selectedPaymentMethod.type === 'card'" class="payment-method-card selected-card">
+            <div class="method-left">
+              <div class="card-mini-preview" [ngClass]="getCardClass(selectedPaymentMethod.brand)">
+                <div class="mini-brand">{{ selectedPaymentMethod.brand }}</div>
+                <div class="mini-number">•••• {{ selectedPaymentMethod.last_four }}</div>
+              </div>
+            </div>
+            <div class="method-info">
+              <div class="method-name">{{ selectedPaymentMethod.holder_name }}</div>
+              <div class="method-details">{{ selectedPaymentMethod.brand }} •••• {{ selectedPaymentMethod.last_four }}</div>
+              <div class="method-badge" *ngIf="selectedPaymentMethod.is_primary">Primary Card</div>
+            </div>
+            <div class="method-icon">💳</div>
+          </div>
+        </div>
+
+        <!-- Payment Methods List (when changing) -->
+        <div *ngIf="showMethodSelection" class="payment-methods-list">
+          
+          <!-- Cards Section -->
+          <div *ngIf="availableCards.length > 0" class="methods-group">
+            <div class="methods-group-title">💳 Payment Cards</div>
+            <div 
+              *ngFor="let card of availableCards" 
+              class="payment-method-option"
+              [ngClass]="{'selected': isMethodSelected(card)}"
+              (click)="selectPaymentMethod(card, 'card')">
+              
+              <div class="method-left">
+                <div class="card-mini-preview" [ngClass]="getCardClass(card.brand)">
+                  <div class="mini-brand">{{ card.brand }}</div>
+                  <div class="mini-number">•••• {{ card.last_four }}</div>
+                </div>
+              </div>
+              <div class="method-info">
+                <div class="method-name">{{ card.holder_name }}</div>
+                <div class="method-details">{{ card.brand }} •••• {{ card.last_four }}</div>
+                <div class="method-badge" *ngIf="card.is_primary">Primary</div>
+              </div>
+              <div class="method-select-indicator">
+                <div class="select-radio" [ngClass]="{'selected': isMethodSelected(card)}"></div>
+              </div>
+            </div>
+          </div>
+
+          <!-- No Payment Methods -->
+          <div *ngIf="availableCards.length === 0" class="no-payment-methods">
+            <div class="no-methods-icon">💳</div>
+            <p>No cards available</p>
+            <button class="btn primary small" (click)="addPaymentMethod()">
+              Add Card
+            </button>
+          </div>
+
+          <div class="method-selection-actions">
+            <button class="btn secondary" (click)="hidePaymentMethods()">
+              Cancel
+            </button>
+          </div>
+        </div>
+      </div>
+
+      <!-- Bank Account Selection (for Bank Transfers) -->
+      <div class="bank-account-section" *ngIf="paymentType === 'bank'">
+        <div class="section-header">
+          <h3 class="section-title">Select Bank Account</h3>
+          <button class="change-method-btn" (click)="showBankAccounts()">
+            Change
+          </button>
+        </div>
+
+        <!-- Selected Bank Account Display -->
+        <div class="selected-payment-method" *ngIf="selectedBankAccount">
+          <div class="payment-method-card selected-bank">
+            <div class="method-left">
+              <div class="bank-mini-preview">
+                <div class="bank-icon-mini">🏦</div>
+                <div class="bank-name-mini">{{ selectedBankAccount.bank_name }}</div>
+              </div>
+            </div>
+            <div class="method-info">
+              <div class="method-name">{{ selectedBankAccount.account_name || selectedBankAccount.bank_name }}</div>
+              <div class="method-details">{{ selectedBankAccount.account_type | titlecase }} {{ selectedBankAccount.masked_account }}</div>
+              <div class="method-badge" *ngIf="selectedBankAccount.is_primary">Primary Account</div>
+            </div>
+            <div class="method-icon">🏦</div>
+          </div>
+        </div>
+
+        <!-- Bank Accounts List (when changing) -->
+        <div *ngIf="showBankSelection" class="payment-methods-list">
+          
+          <!-- Bank Accounts Section -->
+          <div *ngIf="availableBankAccounts.length > 0" class="methods-group">
+            <div class="methods-group-title">🏦 Bank Accounts</div>
+            <div 
+              *ngFor="let account of availableBankAccounts" 
+              class="payment-method-option"
+              [ngClass]="{'selected': isBankAccountSelected(account)}"
+              (click)="selectBankAccount(account)">
+              
+              <div class="method-left">
+                <div class="bank-mini-preview">
+                  <div class="bank-icon-mini">🏦</div>
+                  <div class="bank-name-mini">{{ account.bank_name }}</div>
+                </div>
+              </div>
+              <div class="method-info">
+                <div class="method-name">{{ account.account_name || account.bank_name }}</div>
+                <div class="method-details">{{ account.account_type | titlecase }} {{ account.masked_account }}</div>
+                <div class="method-badge" *ngIf="account.is_primary">Primary</div>
+              </div>
+              <div class="method-select-indicator">
+                <div class="select-radio" [ngClass]="{'selected': isBankAccountSelected(account)}"></div>
+              </div>
+            </div>
+          </div>
+
+          <!-- No Bank Accounts -->
+          <div *ngIf="availableBankAccounts.length === 0" class="no-payment-methods">
+            <div class="no-methods-icon">🏦</div>
+            <p>No bank accounts available</p>
+            <button class="btn primary small" (click)="addBankAccount()">
+              Add Bank Account
+            </button>
+          </div>
+
+          <div class="method-selection-actions">
+            <button class="btn secondary" (click)="hideBankAccounts()">
+              Cancel
+            </button>
+          </div>
+        </div>
+      </div>
+
+      <!-- Recipient Information -->
+      <div class="recipient-section" *ngIf ="paymentType=='bank'">
+        <div class="section-header" (click)="toggleRecipient()">
+          <h3 class="section-title">
+            Recipient Details
+            <span class="required-indicator" *ngIf="isRecipientRequired">*</span>
+          </h3>
+          <div class="section-actions">
+            <span class="recipient-summary" *ngIf="!isRecipientOpen">
+              {{ getRecipientSummary() }}
+            </span>
+            <button class="toggle-btn" [ngClass]="{'open': isRecipientOpen}">
+              <span class="toggle-icon">{{ isRecipientOpen ? '▼' : '▶' }}</span>
+            </button>
+          </div>
+        </div>
+        
+        <div class="recipient-content" *ngIf="isRecipientOpen">
+          
+          <!-- Recipient Name with Search -->
+          <div class="recipient-input-group">
+            <label class="input-label">
+              Recipient Name
+              <span class="required-indicator" *ngIf="isRecipientRequired">*</span>
+            </label>
+            <div class="recipient-name-container">
+              <input 
+                type="text" 
+                class="form-input recipient-name-input"
+                [(ngModel)]="recipientName"
+                (input)="onRecipientNameInput($event)"
+                placeholder="Enter recipient name"
+                [class.error]="isRecipientRequired && !recipientName">
+              
+              <!-- Clear button -->
+              <button 
+                *ngIf="recipientName" 
+                class="clear-recipient-btn"
+                (click)="clearRecipientDetails()">
+                ✕
+              </button>
+            </div>
+            
+            <!-- Saved Recipients Dropdown -->
+            <div *ngIf="showRecipientSearch && getFilteredRecipients().length > 0" class="recipient-search-results">
+              <div class="search-results-header">Previously used recipients</div>
+              <div 
+                *ngFor="let recipient of getFilteredRecipients()" 
+                class="recipient-search-item"
+                (click)="selectSavedRecipient(recipient)">
+                <div class="recipient-item-info">
+                  <div class="recipient-item-name">{{ recipient.name }}</div>
+                  <div class="recipient-item-details">
+                    {{ recipient.email || recipient.phone || 'No contact info' }}
+                    <span class="recipient-category">• {{ recipient.category }}</span>
+                  </div>
+                </div>
+                <div class="recipient-item-icon">→</div>
+              </div>
+            </div>
+          </div>
+
+          <!-- Payment Category -->
+          <div class="recipient-input-group">
+            <label class="input-label">Payment Category</label>
+            <select 
+              class="form-select"
+              [(ngModel)]="recipientCategory">
+              <option value="personal">Personal</option>
+              <option value="business">Business</option>
+              <option value="bill">Bill Payment</option>
+              <option value="donation">Donation</option>
+              <option value="other">Other</option>
+            </select>
+          </div>
+
+          <!-- Payment Memo -->
+          <div class="recipient-input-group">
+            <label class="input-label">Payment Memo</label>
+            <input 
+              type="text" 
+              class="form-input"
+              [(ngModel)]="paymentNote"
+              placeholder="What's this payment for?">
+          </div>
+
+          <!-- Contact Information (Optional) -->
+          <div class="contact-details-section">
+            <h4 class="subsection-title">Contact Information (Optional)</h4>
+            
+            <div class="recipient-input-group">
+              <label class="input-label">Email Address</label>
+              <input 
+                type="email" 
+                class="form-input"
+                [(ngModel)]="recipientEmail"
+                placeholder="recipient@example.com"
+                [class.error]="recipientEmail">
+            </div>
+
+            <div class="recipient-input-group">
+              <label class="input-label">Phone Number</label>
+              <input 
+                type="tel" 
+                class="form-input"
+                [(ngModel)]="recipientPhone"
+                placeholder="+1 (555) 123-4567"
+                [class.error]="recipientPhone">
+            </div>
+          </div>
+
+          <!-- Save Recipient Option -->
+          <div class="recipient-actions" *ngIf="recipientName">
+            <label class="checkbox-container">
+              <input 
+                type="checkbox" 
+                [(ngModel)]="shouldSaveRecipient">
+              <span class="checkmark"></span>
+              <span class="checkbox-label">Save recipient for future payments</span>
+            </label>
+            
+            <div class="save-button-container" [ngClass]="{'show': shouldSaveRecipient}">
+              <button class="btn secondary small" (click)="saveRecipientForFuture()">
+                Save Now
+              </button>
+            </div>
+          </div>
+
+          <!-- Validation Messages -->
+          <div class="recipient-validation">
+            <div 
+              *ngIf="isRecipientRequired && !recipientName" 
+              class="validation-message error">
+              Recipient name is required for this payment
+            </div>
+            <div 
+              *ngIf="recipientEmail" 
+              class="validation-message error">
+              Please enter a valid email address
+            </div>
+            <div 
+              *ngIf="recipientPhone" 
+              class="validation-message error">
+              Please enter a valid phone number
+            </div>
+          </div>
+
+          <!-- Recipient Summary for Large Payments -->
+          <div *ngIf="paymentAmount > 1000 && isRecipientComplete()" class="recipient-summary-card">
+            <div class="summary-header">Payment Recipient</div>
+            <div class="summary-details">
+              <div class="summary-name">{{ recipientName }}</div>
+              <div class="summary-contact" *ngIf="recipientEmail || recipientPhone">
+                {{ recipientEmail || recipientPhone }}
+              </div>
+              <div class="summary-category">{{ recipientCategory | titlecase }} Payment</div>
+            </div>
+          </div>
+        </div>
+      </div>
+
+      <!-- Payment Summary -->
+      <div class="payment-summary" *ngIf="paymentAmount > 0">
+        <div class="summary-row">
+          <span class="summary-label">Amount</span>
+          <span class="summary-value">{{ formatCurrency(paymentAmount) }}</span>
+        </div>
+        <div class="summary-row" *ngIf="processingFee > 0">
+          <span class="summary-label">Processing Fee</span>
+          <span class="summary-value">{{ formatCurrency(processingFee) }}</span>
+        </div>
+        <!-- Recipient in summary -->
+        <div class="summary-row" *ngIf="recipientName">
+          <span class="summary-label">To</span>
+          <span class="summary-value recipient-in-summary">{{ recipientName }}</span>
+        </div>
+        <!-- Payment method in summary -->
+        <div class="summary-row" *ngIf="paymentType === 'others' && selectedPaymentProvider">
+          <span class="summary-label">Via</span>
+          <span class="summary-value">{{ getProviderDisplayName() }}</span>
+        </div>
+        <div class="summary-row total-row">
+          <span class="summary-label">Total</span>
+          <span class="summary-value total-amount">{{ formatCurrency(getTotalAmount()) }}</span>
+        </div>
+      </div>
+
+      <!-- Payment Actions -->
+      <div class="payment-actions">
+        <button 
+          class="btn primary large pay-button"
+          (click)="startVerification()"
+          [disabled]="!isPaymentValid()">
+          <div class="btn-text">
+            <span class="pay-icon">{{ getPaymentTypeIcon() }}</span>
+            {{ getPayButtonText() }} {{ formatCurrency(getTotalAmount()) }}
+          </div>
+        </button>
+        
+        <div class="payment-security-note">
+          <div class="security-icon">🔒</div>
+          <div class="security-text">
+            Your payment will be verified with face authentication for security
+          </div>
+        </div>
+      </div>
+    </div>
+  </div>
+</div>
