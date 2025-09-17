@@ -8,7 +8,7 @@ export interface HSBCCardProcessorConfig {
   merchantId: string;
   apiKey: string;
   secretKey: string;
-  baseUrl: string;
+  HsbcbaseUrl: string;
   enabled: boolean;
 }
 
@@ -84,7 +84,7 @@ export class HSBCCardProcessorService {
     merchantId: process.env['HSBC_MERCHANT_ID'] || '',
     apiKey: process.env['HSBC_API_KEY'] || '',
     secretKey: process.env['HSBC_SECRET_KEY'] || '',
-    baseUrl: 'https://api.hsbc.com/payments/v1', // Production
+    HsbcbaseUrl: 'https://api.hsbc.com/payments/v1', // Production
     // baseUrl: 'https://sandbox-api.hsbc.com/payments/v1', // Sandbox
     enabled: true
   };
@@ -162,7 +162,7 @@ export class HSBCCardProcessorService {
     const headers = this.getAuthHeaders();
 
     return this.http.post<HSBCCardPaymentResponse>(
-      `${this.config.baseUrl}/payments`, 
+      `${this.config.HsbcbaseUrl}/payments`, 
       hsbcPaymentRequest, 
       { headers }
     ).pipe(
@@ -222,7 +222,7 @@ export class HSBCCardProcessorService {
     const headers = this.getAuthHeaders();
 
     return this.http.post<HSBCCardPaymentResponse>(
-      `${this.config.baseUrl}/payments/stored-card`, 
+      `${this.config.HsbcbaseUrl}/payments/stored-card`, 
       hsbcPaymentRequest, 
       { headers }
     ).pipe(
@@ -255,7 +255,7 @@ export class HSBCCardProcessorService {
     const headers = this.getAuthHeaders();
 
     return this.http.get<{cards: StoredCard[]}>(
-      `${this.config.baseUrl}/customers/${customerId}/cards`, 
+      `${this.config.HsbcbaseUrl}/customers/${customerId}/cards`, 
       { headers }
     ).pipe(
       map(response => response.cards || []),
@@ -282,7 +282,7 @@ export class HSBCCardProcessorService {
     };
 
     return this.http.post<StoredCard>(
-      `${this.config.baseUrl}/cards/store`, 
+      `${this.config.HsbcbaseUrl}/cards/store`, 
       storeCardRequest, 
       { headers }
     ).pipe(
@@ -304,7 +304,7 @@ export class HSBCCardProcessorService {
     };
 
     return this.http.post<any>(
-      `${this.config.baseUrl}/cards/verify`, 
+      `${this.config.HsbcbaseUrl}/cards/verify`, 
       verifyRequest, 
       { headers }
     ).pipe(
@@ -322,7 +322,7 @@ export class HSBCCardProcessorService {
     const headers = this.getAuthHeaders();
 
     return this.http.get<HSBCCardPaymentResponse>(
-      `${this.config.baseUrl}/payments/${paymentId}`, 
+      `${this.config.HsbcbaseUrl}/payments/${paymentId}`, 
       { headers }
     ).pipe(
       map(response => ({
@@ -352,7 +352,7 @@ export class HSBCCardProcessorService {
     };
 
     return this.http.post<any>(
-      `${this.config.baseUrl}/payments/${paymentId}/refund`, 
+      `${this.config.HsbcbaseUrl}/payments/${paymentId}/refund`, 
       refundRequest, 
       { headers }
     ).pipe(
@@ -372,7 +372,7 @@ export class HSBCCardProcessorService {
     const headers = this.getAuthHeaders();
     
     return this.http.post<any>(
-      `${this.config.baseUrl}/fees/calculate`, 
+      `${this.config.HsbcbaseUrl}/fees/calculate`, 
       { amount, card_type: cardType }, 
       { headers }
     ).pipe(
@@ -436,7 +436,7 @@ export class HSBCCardProcessorService {
 
     const headers = this.getAuthHeaders();
 
-    return this.http.get(`${this.config.baseUrl}/health`, { headers }).pipe(
+    return this.http.get(`${this.config.HsbcbaseUrl}/health`, { headers }).pipe(
       map(() => true),
       catchError(() => of(false))
     );

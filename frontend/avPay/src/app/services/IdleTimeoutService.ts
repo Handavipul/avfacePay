@@ -7,7 +7,7 @@ import { AuthService } from './auth.service';
   providedIn: 'root'
 })
 export class IdleTimeoutService {
-  private timeoutInMs = 15 * 60 * 1000; // 15 minutes
+  private timeoutInMs = 5 * 60 * 1000; // 15 minutes
   private timeoutId: any;
 
   constructor(

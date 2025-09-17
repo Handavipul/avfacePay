@@ -57,10 +57,7 @@ export interface LinkedCard {
 export class FallbackAuthService {
 
   constructor(
-    // Inject your existing services here
-    // private httpClient: HttpClient,
-    // private encryptionService: EncryptionService,
-    // private auditService: AuditService
+   
   ) { }
 
   /**
@@ -307,24 +304,9 @@ export class FallbackAuthService {
     }
   }
 
-  /**
-   * Encrypt sensitive data before transmission
-   * This is a placeholder - implement proper encryption
-   */
-  private encryptSensitiveData(data: any): string {
-    // TODO: Implement proper encryption
-    // Use your encryption service here
-    return btoa(JSON.stringify(data)); // Base64 encoding for demo - NOT secure for production
-  }
 
-  /**
-   * Rate limit fallback attempts per session/IP
-   */
-  private checkRateLimit(identifier: string): boolean {
-    // TODO: Implement proper rate limiting
-    // This could use Redis, database, or in-memory store
-    return true; // Allow for demo
-  }
+
+ 
 }
 
 // ==================== INTERFACE DEFINITIONS ====================

@@ -2,6 +2,7 @@ import { Injectable } from '@angular/core';
 import { HttpClient, HttpErrorResponse, HttpHeaders } from '@angular/common/http';
 import { Observable, BehaviorSubject, throwError } from 'rxjs';
 import { map, catchError } from 'rxjs/operators';
+import { environment } from '../../environments/environment';
 
 export interface EmailValidationRequest {
   email: string;
@@ -96,8 +97,9 @@ export interface UserContactResponse {
   providedIn: 'root'
 })
 export class AuthService {
-  private apiUrl = 'http://localhost:8000/auth'; // Update this to your FastAPI server URL
-  private baseUrl = 'http://localhost:8000'; // Update this to your FastAPI server URL
+  private baseUrl =  environment.apiUrl;; // Update this to your FastAPI server URL
+  private apiUrl = `${this.baseUrl}/auth`; // Update this to your FastAPI server URL
+
   private tokenKey = 'auth_token';
   private userKey = 'user_info';
   private tokenSubject = new BehaviorSubject<string | null>(null);
