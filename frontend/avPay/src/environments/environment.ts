@@ -23,7 +23,7 @@ export const environment = {
     // encryptionKey: process.env['HSBC_PROD_ENCRYPTION_KEY'] || '',
     // signingKey: process.env['HSBC_PROD_SIGNING_KEY'] || '',
     // corporateAccountId: process.env['HSBC_PROD_CORPORATE_ACCOUNT'] || '',
-    baseUrl: 'https://api.hsbc.com/corporate-banking/v1', // Production URL
+    baseUrl: 'https://api.hsbc.com/payments/v1', // Production URL
     enabled: true
   },
   mollieApiKey: 'test_jmCkdTUcct3aEeuvCeuHJDeqS6NzAR', // Test API key

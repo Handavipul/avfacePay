@@ -3,6 +3,7 @@ import { Injectable, Inject } from '@angular/core';
 import { HttpClient, HttpHeaders, HttpErrorResponse } from '@angular/common/http';
 import { Observable, throwError, from, of } from 'rxjs';
 import { map, catchError, switchMap, retry } from 'rxjs/operators';
+import { environment } from '../../environments/environment';
 
 export interface HSBCCardProcessorConfig {
   merchantId: string;
@@ -84,7 +85,7 @@ export class HSBCCardProcessorService {
     merchantId: process.env['HSBC_MERCHANT_ID'] || '',
     apiKey: process.env['HSBC_API_KEY'] || '',
     secretKey: process.env['HSBC_SECRET_KEY'] || '',
-    HsbcbaseUrl: 'https://api.hsbc.com/payments/v1', // Production
+    HsbcbaseUrl:  environment.hsbc.baseUrl || 'https://api.hsbc.com/payments/v1', // Production
     // baseUrl: 'https://sandbox-api.hsbc.com/payments/v1', // Sandbox
     enabled: true
   };

@@ -23,11 +23,11 @@ export const environment = {
         encryptionKey: 'YOUR_HSBC_ENCRYPTION_KEY', // Replace with actual encryption key
         signingKey: 'YOUR_HSBC_SIGNING_KEY', // Replace with actual signing key
         corporateAccountId: 'av_solutio_11775', // Replace with your corporate account
-        baseUrl: 'https://sandbox.hsbc.com/corporate-banking/v1', // Sandbox URL
-        enabled: true // Toggle HSBC integration
-    } ,
-  mollieApiKey: 'test_jmCkdTUcct3aEeuvCeuHJDeqS6NzAR', // Test API key
-  mollieProfileId: 'pfl_EUaZi8qpyn', // Your Mollie profile ID
+        baseUrl: 'https://api.hsbc.com/payments/v1', // Production URL
+        enabled: true
+    },
+    mollieApiKey: 'test_jmCkdTUcct3aEeuvCeuHJDeqS6NzAR', // Test API key
+    mollieProfileId: 'pfl_EUaZi8qpyn', // Your Mollie profile ID
   mollieWebhookUrl: '/mollie/webhook',
   mollieRedirectUrl: 'https://localhost:4200/payment/success',  
 };
