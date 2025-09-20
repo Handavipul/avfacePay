@@ -54,6 +54,6 @@ class Settings(BaseSettings):
 
     class Config:
         env_file = f".env.{ENV}"
-        extra = "ignore"
+        extra = "allow"
 
 settings = Settings()
