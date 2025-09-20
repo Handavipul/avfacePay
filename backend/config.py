@@ -42,7 +42,7 @@ class Settings(BaseSettings):
     OTP_MAX_ATTEMPTS: int = 3
     OTP_COOLDOWN_MINUTES: int = 5
     OTP_RATE_LIMIT_PER_HOUR: int = 10  
-    
+    #test
     # URLs (read from env automatically)
     FRONTEND_URL: str
     BACKEND_URL: str
