@@ -53,7 +53,7 @@ class Settings(BaseSettings):
         return [self.FRONTEND_URL, self.BACKEND_URL]
 
     class Config:
-        env_file = f".env.{ENV}"
+        env_file = os.path.join(os.path.dirname(__file__), f".env.{ENV}")
         extra = "allow"
 
 settings = Settings()
