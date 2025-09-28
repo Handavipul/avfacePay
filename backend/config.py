@@ -40,6 +40,12 @@ class Settings(BaseSettings):
     SQS_PAYMENT_QUEUE_URL: Optional[str] = secrets.get("SQS_PAYMENT_QUEUE_URL")
     S3_SECURE_BUCKET: Optional[str] = secrets.get("S3_SECURE_BUCKET")
     MOLLIE_API_KEY: Optional[str] = secrets.get("MOLLIE_API_KEY")
+    METRICS_ENABLED: bool = True
+    METRICS_PATH: str = "/metrics"
+    MTLS_ENABLED: bool = False 
+    CLIENT_CERT_PATH: Optional[str] = "/certs/client.crt" 
+    CLIENT_KEY_PATH: Optional[str] = "/certs/client.key"
+    CA_CERT_PATH: Optional[str] = "/certs/ca.crt"
 
     # Email
     EMAIL_USER: Optional[str] = secrets.get("EMAIL_USER")
