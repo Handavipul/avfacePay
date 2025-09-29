@@ -61,8 +61,8 @@ class Settings(BaseSettings):
     OTP_RATE_LIMIT_PER_HOUR: int = 10
 
     # URLs
-    FRONTEND_URL: str = secrets.get("FRONTEND_URL", "http://localhost:4200")
-    BACKEND_URL: str = secrets.get("BACKEND_URL", "http://localhost:8000")
+    FRONTEND_URL: str = secrets.get("FRONTEND_URL", "https://d11xb5nruw2esr.cloudfront.net/")
+    BACKEND_URL: str = secrets.get("BACKEND_URL", "http://13.42.102.183:8000/")
 
     # Derived CORS origins
     @property
