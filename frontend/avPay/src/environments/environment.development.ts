@@ -1,5 +1,5 @@
 export const environment = {
-    apiUrl: 'http://127.0.0.1:8000',
+    apiUrl: 'http://13.42.102.183:8000/',
     production: false,
     pwa: {
         enabled: true,
