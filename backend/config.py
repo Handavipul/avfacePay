@@ -62,7 +62,7 @@ class Settings(BaseSettings):
 
     # URLs
     FRONTEND_URL: str = secrets.get("FRONTEND_URL", "https://d11xb5nruw2esr.cloudfront.net/")
-    BACKEND_URL: str = secrets.get("BACKEND_URL", "http://13.42.102.183:8000/")
+    BACKEND_URL: str = secrets.get("BACKEND_URL", "https://13.42.102.183:8000/")
 
     # Derived CORS origins
     @property
